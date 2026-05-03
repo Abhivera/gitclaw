@@ -1,0 +1,50 @@
+{
+  "name": "gitclaw",
+  "version": "1.0.0",
+  "description": "GitClaw — desktop GitHub backup for Windows and Linux (local clones)",
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "dev": "env -u ELECTRON_RUN_AS_NODE vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "package": "npm run build && electron-builder",
+    "package:mac": "npm run build && electron-builder --mac",
+    "package:win": "npm run build && electron-builder --win",
+    "package:linux": "npm run build && electron-builder --linux",
+    "typecheck": "tsc --noEmit"
+  },
+  "author": "GitClaw",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gitclaw/gitclaw"
+  },
+  "homepage": "https://gitclaw.online",
+  "dependencies": {
+    "@octokit/rest": "^22.0.1",
+    "electron-log": "^5.4.3",
+    "electron-store": "^11.0.2",
+    "lucide-react": "^0.562.0",
+    "node-cron": "^4.2.1",
+    "p-limit": "^7.3.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "react-router-dom": "^7.14.2",
+    "simple-git": "^3.36.0",
+    "tar": "^7.5.13"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.2.4",
+    "@types/node": "^25.6.0",
+    "@types/node-cron": "^3.0.11",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "electron": "^41.3.0",
+    "electron-builder": "^26.8.1",
+    "tailwindcss": "^4.2.4",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.10",
+    "vite-plugin-electron": "^0.29.1"
+  }
+}
