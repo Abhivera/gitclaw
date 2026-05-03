@@ -10,6 +10,7 @@ import {
   Zap,
 } from 'lucide-react'
 import { useSettings } from '../hooks/useSettings'
+import { InstallGitSection } from '../components/InstallGitSection'
 import { PageHeader } from '../components/ui/PageHeader'
 import { SectionIcon } from '../components/ui/SectionIcon'
 import type { ScheduleConfig } from '../types'
@@ -92,8 +93,8 @@ export default function SettingsPage() {
                 <div className="min-w-0">
                   <h3 className="text-sm font-semibold tracking-tight text-zinc-100">Scheduled backups</h3>
                   <p className="mt-1 max-w-md text-xs leading-relaxed text-zinc-500">
-                    Runs in the background while GitClaw stays open. Keep the app in the tray so the schedule can
-                    fire.
+                    Runs in the background while GitClaw stays open. Keep it running (menu bar on macOS, system tray
+                    on Windows and Linux) so the schedule can fire.
                   </p>
                 </div>
               </div>
@@ -109,7 +110,7 @@ export default function SettingsPage() {
                 <button
                   type="button"
                   onClick={() => updateSchedule({ enabled: !schedule.enabled })}
-                  className={`relative h-8 w-[3.25rem] shrink-0 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8d6e9e]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0e141c] ${
+                  className={`relative h-8 w-12 shrink-0 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8d6e9e]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0e141c] ${
                     schedule.enabled ? 'bg-[#8d6e9e] shadow-inner shadow-[#502f4c]/40' : 'bg-zinc-800 ring-1 ring-zinc-700'
                   }`}
                   aria-pressed={schedule.enabled}
@@ -117,7 +118,7 @@ export default function SettingsPage() {
                 >
                   <span
                     className={`absolute top-1 left-1 h-6 w-6 rounded-full bg-white shadow-md transition-transform duration-200 ease-out ${
-                      schedule.enabled ? 'translate-x-[1.35rem]' : 'translate-x-0'
+                      schedule.enabled ? 'translate-x-5' : 'translate-x-0'
                     }`}
                   />
                 </button>
@@ -300,6 +301,8 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
+
+        <InstallGitSection />
 
         <div className="rounded-2xl border border-white/[0.06] bg-[#0e141c] p-5 shadow-xl shadow-black/25">
           <div className="flex items-center gap-3">

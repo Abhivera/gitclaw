@@ -1,6 +1,6 @@
 # GitClaw
 
-**[gitclaw.online](https://gitclaw.online)** — Desktop app to back up your GitHub repositories on your own machine. Built with Electron, React, and TypeScript; runs locally on **Windows** and **Linux**.
+**[gitclaw.online](https://gitclaw.online)** — Desktop app to back up your GitHub repositories on your own machine. Built with Electron, React, and TypeScript; runs locally on **Windows**, **Linux**, and **macOS**.
 
 ![Electron](https://img.shields.io/badge/Electron-41-47848F?logo=electron&logoColor=white)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
@@ -16,12 +16,26 @@
 - **Concurrency** — Configurable parallel repo operations
 - **Progress** — Per-repo status and log output
 
-## Run locally (Windows & Linux)
+## Run locally (Windows, Linux & macOS)
 
 ### Prerequisites
 
 1. **[Node.js](https://nodejs.org/)** 20 LTS (or 18+)  
-2. **[Git](https://git-scm.com/)** installed and on your `PATH` (`git --version` works in a terminal)
+2. **[Git](https://git-scm.com/)** on your `PATH` (`git --version` works in a terminal). On macOS, install [Xcode Command Line Tools](https://developer.apple.com/library/archive/technotes/tn2339/_index.html) (includes `git`) or Git from the link above.
+
+Install Git from the official downloads, or use your OS package manager:
+
+| OS | Command / link |
+|----|----------------|
+| **Linux** (Debian / Ubuntu) | `sudo apt update && sudo apt install -y git` — [git-scm.com/download/linux](https://git-scm.com/download/linux) |
+| **Windows** | `winget install --id Git.Git -e --source winget` — [git-scm.com/download/win](https://git-scm.com/download/win) |
+| **macOS** | `brew install git` — [git-scm.com/download/mac](https://git-scm.com/download/mac) |
+
+### Download GitClaw (installers)
+
+Prebuilt **Windows (.exe)**, **Linux (.deb, AppImage)**, and **macOS (.dmg)** are on GitHub Releases: **[github.com/gitclaw/gitclaw/releases/latest](https://github.com/gitclaw/gitclaw/releases/latest)**.
+
+After downloading the `.deb` on Debian/Ubuntu: `sudo apt install ./gitclaw_*_amd64.deb` (from the directory that contains the file).
 
 ### Clone and install
 
@@ -47,9 +61,12 @@ npm run build
 
 | Command | Output (under `release/`) |
 |---------|---------------------------|
+| `npm run package:mac` | `.dmg` and `.zip` (macOS) |
 | `npm run package:win` | NSIS `.exe` (Windows) |
 | `npm run package:linux` | `.AppImage` and `.deb` (Linux) |
 | `npm run package` | Targets for the **current** platform |
+
+**macOS:** Build the `.dmg` on a Mac (`npm run package:mac`). If Gatekeeper blocks an **unsigned** build, right-click the app → **Open** once, or allow it under **System Settings → Privacy & Security**. For distribution outside the Mac App Store, Apple recommends Developer ID signing and notarization (optional CI secrets).
 
 **Linux:** For AppImage, mark executable then run: `chmod +x GitClaw-*.AppImage && ./GitClaw-*.AppImage`. For `.deb`, install with your package manager (e.g. `sudo apt install ./GitClaw_*.deb`).
 

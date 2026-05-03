@@ -1,7 +1,7 @@
 {
   "name": "gitclaw",
   "version": "1.0.0",
-  "description": "GitClaw — desktop GitHub backup for Windows and Linux (local clones)",
+  "description": "GitClaw — desktop GitHub backup for Windows, Linux, and macOS (local clones)",
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "env -u ELECTRON_RUN_AS_NODE vite",
