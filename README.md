@@ -33,7 +33,7 @@ Install Git from the official downloads, or use your OS package manager:
 
 ### Download GitClaw (installers)
 
-Prebuilt **Windows (.exe)**, **Linux (.deb, AppImage)**, and **macOS (.dmg)** are on GitHub Releases: **[github.com/gitclaw/gitclaw/releases/latest](https://github.com/gitclaw/gitclaw/releases/latest)**.
+Prebuilt **Windows (.exe)**, **Linux (.deb, AppImage)**, and **macOS (.dmg)** are on GitHub Releases: **[github.com/Abhivera/gitclaw/releases/latest](https://github.com/Abhivera/gitclaw/releases/latest)**.
 
 After downloading the `.deb` on Debian/Ubuntu: `sudo apt install ./gitclaw_*_amd64.deb` (from the directory that contains the file).
 

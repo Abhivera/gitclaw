@@ -1,0 +1,5 @@
+# https://gitclaw.online — GitClaw download & docs landing
+User-agent: *
+Allow: /
+
+Sitemap: https://gitclaw.online/sitemap.xml

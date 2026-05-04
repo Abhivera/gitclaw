@@ -11,13 +11,16 @@
     "package:mac": "npm run build && electron-builder --mac",
     "package:win": "npm run build && electron-builder --win",
     "package:linux": "npm run build && electron-builder --linux",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "website:dev": "npm run dev --prefix website",
+    "website:build": "npm run build --prefix website",
+    "website:preview": "npm run preview --prefix website"
   },
   "author": "GitClaw",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/gitclaw/gitclaw"
+    "url": "https://github.com/Abhivera/gitclaw"
   },
   "homepage": "https://gitclaw.online",
   "dependencies": {

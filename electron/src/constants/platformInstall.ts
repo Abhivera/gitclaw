@@ -1,6 +1,6 @@
 /** GitHub releases (installers: .exe, .dmg, .deb, AppImage). */
 export const GITHUB_LATEST_RELEASE =
-  'https://github.com/gitclaw/gitclaw/releases/latest'
+  'https://github.com/Abhivera/gitclaw/releases/latest'
 
 export type PlatformInstallRow = {
   id: string
