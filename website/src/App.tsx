@@ -131,7 +131,7 @@ export default function App() {
             </div>
           </div>
           <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-            GitClaw — local GitHub, GitLab & Bitbucket backup
+            GitClaw — local GitHub, GitLab & Bitbucket Backup Scheduler
           </h1>
           <p className="mx-auto mt-3 max-w-xl text-lg leading-relaxed text-zinc-400">
             <strong className="font-medium text-zinc-300">GitHub backup</strong>,{' '}
@@ -216,6 +216,34 @@ export default function App() {
               </span>
             </li>
           </ul>
+        </section>
+
+
+        <section
+          aria-labelledby="cli-heading"
+          className="rounded-2xl border border-white/[0.08] bg-[#0a0e14]/90 p-6 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]"
+        >
+          <div className="mb-4 flex items-center gap-2 text-[#b29bbd]">
+            <Terminal className="h-4 w-4" aria-hidden />
+            <h2 id="cli-heading" className="text-sm font-medium">
+              Install from the terminal
+            </h2>
+          </div>
+          <p className="mb-3 text-sm text-zinc-500">macOS & Linux (requires bash, curl or wget):</p>
+          <pre className="overflow-x-auto rounded-xl bg-black/40 p-4 font-mono text-xs leading-relaxed text-zinc-300 ring-1 ring-white/[0.06] sm:text-sm">
+            {INSTALL_SH}
+          </pre>
+          <p className="mb-3 mt-5 text-sm text-zinc-500">Windows (PowerShell):</p>
+          <pre className="overflow-x-auto rounded-xl bg-black/40 p-4 font-mono text-xs leading-relaxed text-zinc-300 ring-1 ring-white/[0.06] sm:text-sm">
+            {INSTALL_PS}
+          </pre>
+          <p className="mt-4 text-xs text-zinc-600">
+            Scripts live in the{' '}
+            <a href={URLS.repo} className="text-[#8d6e9e] hover:underline" target="_blank" rel="noreferrer">
+              open-source repo
+            </a>
+            . Review before piping to a shell.
+          </p>
         </section>
 
         <section aria-labelledby="download-heading" className="mb-14">
@@ -305,32 +333,7 @@ export default function App() {
           )}
         </section>
 
-        <section
-          aria-labelledby="cli-heading"
-          className="rounded-2xl border border-white/[0.08] bg-[#0a0e14]/90 p-6 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]"
-        >
-          <div className="mb-4 flex items-center gap-2 text-[#b29bbd]">
-            <Terminal className="h-4 w-4" aria-hidden />
-            <h2 id="cli-heading" className="text-sm font-medium">
-              Install from the terminal
-            </h2>
-          </div>
-          <p className="mb-3 text-sm text-zinc-500">macOS & Linux (requires bash, curl or wget):</p>
-          <pre className="overflow-x-auto rounded-xl bg-black/40 p-4 font-mono text-xs leading-relaxed text-zinc-300 ring-1 ring-white/[0.06] sm:text-sm">
-            {INSTALL_SH}
-          </pre>
-          <p className="mb-3 mt-5 text-sm text-zinc-500">Windows (PowerShell):</p>
-          <pre className="overflow-x-auto rounded-xl bg-black/40 p-4 font-mono text-xs leading-relaxed text-zinc-300 ring-1 ring-white/[0.06] sm:text-sm">
-            {INSTALL_PS}
-          </pre>
-          <p className="mt-4 text-xs text-zinc-600">
-            Scripts live in the{' '}
-            <a href={URLS.repo} className="text-[#8d6e9e] hover:underline" target="_blank" rel="noreferrer">
-              open-source repo
-            </a>
-            . Review before piping to a shell.
-          </p>
-        </section>
+    
 
         <footer className="mt-16 text-center text-xs text-zinc-600">
           <p>
