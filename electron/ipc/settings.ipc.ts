@@ -10,11 +10,6 @@ export function registerSettingsHandlers() {
 
   ipcMain.handle(IPC.SETTINGS_SET, (_event, settings: Record<string, unknown>) => {
     for (const [key, value] of Object.entries(settings)) {
-      if (key === 'githubToken' && value != null && String(value).length > 0) {
-        store.set('gitToken', String(value))
-        store.set('githubToken', '')
-        continue
-      }
       if (key === 'selectedRepoIds' && Array.isArray(value)) {
         store.set(
           'selectedRepoIds',

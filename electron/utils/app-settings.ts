@@ -6,11 +6,9 @@ function normalizeSelectedRepoIds(raw: unknown): string[] {
   return raw.map((id) => String(id))
 }
 
-/** Read persisted store fields and apply legacy migrations (githubToken → gitToken, numeric repo ids). */
+/** Read persisted store fields (repo ids normalized to strings). */
 export function getHydratedAppSettings(): AppSettings {
-  const gitTokenStored = store.get('gitToken') as string | undefined
-  const legacyGithub = (store.get('githubToken') as string) || ''
-  const gitToken = String(gitTokenStored ?? '').trim() || String(legacyGithub).trim()
+  const gitToken = String(store.get('gitToken') ?? '').trim()
 
   const rawProvider = store.get('gitProvider') as GitProvider | undefined
   const gitProvider: GitProvider =
@@ -24,8 +22,6 @@ export function getHydratedAppSettings(): AppSettings {
     gitlabBaseUrl: (store.get('gitlabBaseUrl') as string) || 'https://gitlab.com',
     bitbucketUsername: (store.get('bitbucketUsername') as string) || '',
     backupPath: store.get('backupPath'),
-    cloudProvider: store.get('cloudProvider'),
-    cloudConfig: store.get('cloudConfig'),
     repoFilters: store.get('repoFilters'),
     selectedRepoIds: normalizeSelectedRepoIds(store.get('selectedRepoIds')),
     schedule: store.get('schedule'),

@@ -13,13 +13,6 @@ const defaultSettings: AppSettings = {
   gitlabBaseUrl: 'https://gitlab.com',
   bitbucketUsername: '',
   backupPath: '',
-  cloudProvider: 'none',
-  cloudConfig: {
-    bucket: '',
-    region: 'us-east-1',
-    accessKeyId: '',
-    secretAccessKey: '',
-  },
   repoFilters: {
     owned: true,
     organization: false,

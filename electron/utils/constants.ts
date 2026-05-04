@@ -5,9 +5,6 @@ export const IPC = {
   GIT_CLONE: 'git:clone',
   GIT_PULL: 'git:pull',
 
-  CLOUD_TEST_CONNECTION: 'cloud:test-connection',
-  CLOUD_UPLOAD: 'cloud:upload',
-
   BACKUP_START: 'backup:start',
   BACKUP_CANCEL: 'backup:cancel',
   BACKUP_PROGRESS: 'backup:progress',
@@ -34,8 +31,6 @@ export const ALLOWED_INVOKE_CHANNELS = [
   IPC.REMOTE_FETCH_REPOS,
   IPC.GIT_CLONE,
   IPC.GIT_PULL,
-  IPC.CLOUD_TEST_CONNECTION,
-  IPC.CLOUD_UPLOAD,
   IPC.BACKUP_START,
   IPC.BACKUP_CANCEL,
   IPC.SETTINGS_GET,

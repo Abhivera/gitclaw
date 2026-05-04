@@ -6,21 +6,10 @@ export interface AppSettings {
   gitlabBaseUrl: string
   bitbucketUsername: string
   backupPath: string
-  cloudProvider: 's3' | 'r2' | 'none'
-  cloudConfig: CloudConfig
   repoFilters: RepoFilterSet
   selectedRepoIds: string[]
   schedule: ScheduleConfig
   concurrencyLimit: number
-}
-
-export interface CloudConfig {
-  bucket: string
-  region: string
-  accessKeyId: string
-  secretAccessKey: string
-  endpoint?: string
-  pathPrefix?: string
 }
 
 export interface RepoFilterSet {
@@ -50,7 +39,6 @@ export type RepoBackupStage =
   | 'cloning'
   | 'updating'
   | 'compressing'
-  | 'uploading'
   | 'done'
   | 'failed'
   | 'skipped'

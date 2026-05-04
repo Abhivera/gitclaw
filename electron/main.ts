@@ -1,4 +1,5 @@
 import { app, BrowserWindow, shell } from 'electron'
+import fs from 'fs'
 import path from 'path'
 import { registerAllHandlers } from './ipc'
 import { createTray } from './tray'
@@ -13,6 +14,17 @@ process.env.VITE_PUBLIC = process.env.VITE_DEV_SERVER_URL
 
 let mainWindow: BrowserWindow | null = null
 
+function resolveWindowIconPath(): string | undefined {
+  const candidates = [
+    path.join(__dirname, '../dist/icon.png'),
+    path.join(__dirname, '../public/icon.png'),
+  ]
+  for (const p of candidates) {
+    if (fs.existsSync(p)) return p
+  }
+  return undefined
+}
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1100,
@@ -20,6 +32,7 @@ function createWindow() {
     minWidth: 900,
     minHeight: 600,
     title: 'GitClaw',
+    icon: resolveWindowIconPath(),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
