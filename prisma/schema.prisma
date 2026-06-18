@@ -1,0 +1,179 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum GitProvider {
+  github
+  gitlab
+  bitbucket
+}
+
+model User {
+  id                  String               @id
+  name                String
+  email               String
+  emailVerified       Boolean              @default(false)
+  image               String?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  sessions            Session[]
+  accounts            Account[]
+  organizationMembers OrganizationMember[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Organization {
+  id              String               @id @default(cuid())
+  name            String
+  slug            String               @unique
+  slackWebhookUrl String?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  members         OrganizationMember[]
+  connections     ProviderConnection[]
+
+  @@map("organization")
+}
+
+model OrganizationMember {
+  id        String       @id @default(cuid())
+  orgId     String
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String
+  createdAt DateTime     @default(now())
+
+  @@unique([orgId, userId])
+  @@index([userId])
+  @@map("organization_member")
+}
+
+model ProviderConnection {
+  id                   String       @id @default(cuid())
+  organizationId       String
+  organization         Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  provider             GitProvider
+  externalId           String
+  accessToken          String?
+  refreshToken         String?
+  accessTokenExpiresAt DateTime?
+  accountLogin         String?
+  accountType          String?
+  webhookSecret        String       @default(cuid())
+  metadata             Json?
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+  pullRequests         PullRequest[]
+  repositories         Repository[]
+
+  @@unique([organizationId, provider])
+  @@unique([provider, externalId])
+  @@map("provider_connection")
+}
+
+model Repository {
+  id            String             @id @default(cuid())
+  connectionId  String
+  connection    ProviderConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  fullName      String
+  provider      GitProvider
+  enabled       Boolean            @default(true)
+  defaultBranch String?
+  config        Json?
+  configSha     String?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  pullRequests  PullRequest[]
+
+  @@unique([connectionId, fullName])
+  @@map("repository")
+}
+
+model PullRequest {
+  id                String             @id @default(cuid())
+  provider          GitProvider        @default(github)
+  connectionId      String
+  connection        ProviderConnection @relation(fields: [connectionId], references: [id])
+  repositoryId      String?
+  repository        Repository?        @relation(fields: [repositoryId], references: [id])
+  repoFullName      String
+  prNumber          Int
+  projectExternalId String?
+  title             String
+  authorLogin       String?
+  headSha           String
+  baseBranch        String
+  status            String             @default("pending")
+  reviewComment     String?
+  reviewFindings    Json?
+  lastReviewedSha   String?
+  reviewRunCount    Int                @default(0)
+  skipReason        String?
+  reviewedAt        DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@unique([provider, repoFullName, prNumber])
+  @@map("pull_request")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}

@@ -1,0 +1,174 @@
+import { requireAuth } from "@/features/auth/actions";
+import { DashboardHeader } from "@/features/dashboard/components/dashboard-header";
+import { PrStatusBadge } from "@/features/dashboard/components/pr-status-badge";
+import { RerunReviewButton } from "@/features/dashboard/components/rerun-review-button";
+import { DASHBOARD_ROUTES } from "@/features/dashboard/lib/routes";
+import { getPullRequestDetail } from "@/features/dashboard/server/queries";
+import { getPullRequestUrl } from "@/features/git-providers/lib/pr-url";
+import type { ReviewFinding } from "@/features/reviews/types/review-finding";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { format } from "date-fns";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+
+export const metadata: Metadata = {
+  title: "Pull request · Dashboard",
+};
+
+type PageProps = {
+  params: Promise<{ id: string }>;
+};
+
+const PullRequestDetailPage = async ({ params }: PageProps) => {
+  const session = await requireAuth();
+  const { id } = await params;
+  const pullRequest = await getPullRequestDetail(session.user.id, id);
+
+  if (!pullRequest) {
+    notFound();
+  }
+
+  const findings = (pullRequest.reviewFindings as ReviewFinding[] | null) ?? [];
+  const hostUrl = getPullRequestUrl(
+    pullRequest.provider,
+    pullRequest.repoFullName,
+    pullRequest.prNumber
+  );
+
+  return (
+    <>
+      <DashboardHeader
+        title={`#${pullRequest.prNumber} ${pullRequest.title}`}
+        description={pullRequest.repoFullName}
+      />
+      <div className="flex flex-1 flex-col gap-6 p-6">
+        <div className="flex flex-wrap items-center gap-3">
+          <PrStatusBadge status={pullRequest.status} />
+          <span className="text-sm text-muted-foreground capitalize">
+            {pullRequest.provider}
+          </span>
+          {pullRequest.authorLogin ? (
+            <span className="text-sm text-muted-foreground">
+              by {pullRequest.authorLogin}
+            </span>
+          ) : null}
+          <a
+            href={hostUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm underline"
+          >
+            Open on git host
+          </a>
+          <RerunReviewButton pullRequestId={pullRequest.id} />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Card>
+            <CardHeader>
+              <CardTitle>Head SHA</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <code className="text-xs">{pullRequest.headSha.slice(0, 12)}</code>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Review runs</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-semibold">
+                {pullRequest.reviewRunCount}
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Last reviewed</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                {pullRequest.reviewedAt
+                  ? format(pullRequest.reviewedAt, "PPp")
+                  : "Not yet reviewed"}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {pullRequest.skipReason ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Skipped</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Reason: {pullRequest.skipReason.replace(/_/g, " ")}
+              </p>
+            </CardContent>
+          </Card>
+        ) : null}
+
+        {pullRequest.reviewComment ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Review summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <pre className="whitespace-pre-wrap text-sm">
+                {pullRequest.reviewComment}
+              </pre>
+            </CardContent>
+          </Card>
+        ) : null}
+
+        {findings.length > 0 ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Findings ({findings.length})</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {findings.map((finding, index) => (
+                <div
+                  key={`${finding.file}-${finding.line}-${index}`}
+                  className="rounded-md border border-border p-3"
+                >
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <span
+                      className={
+                        finding.severity === "issue"
+                          ? "text-red-600 dark:text-red-400"
+                          : "text-amber-600 dark:text-amber-400"
+                      }
+                    >
+                      {finding.severity}
+                    </span>
+                    <code>
+                      {finding.file}:{finding.line}
+                    </code>
+                  </div>
+                  <p className="mt-2 text-sm">{finding.body}</p>
+                  {finding.suggestion ? (
+                    <pre className="mt-2 overflow-x-auto rounded bg-muted p-2 text-xs">
+                      {finding.suggestion}
+                    </pre>
+                  ) : null}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        ) : null}
+
+        <Link
+          href={DASHBOARD_ROUTES.pullRequest}
+          className="text-sm text-muted-foreground hover:text-foreground"
+        >
+          ← Back to pull requests
+        </Link>
+      </div>
+    </>
+  );
+};
+
+export default PullRequestDetailPage;
