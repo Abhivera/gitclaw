@@ -25,7 +25,6 @@ export type UserMenuUser = {
   image?: string | null;
 };
 
-
 export type UserMenuTriggerVariant = "compact" | "profile"
 
 type UserMenuProps = {
@@ -66,7 +65,6 @@ function UserAvatar({
     </Avatar>
   );
 }
-
 
 export function UserMenu({
   user,
@@ -113,7 +111,7 @@ export function UserMenu({
             <span className="max-w-32 truncate text-left text-xs font-medium">
               {displayName}
             </span>
-            <CaretCircleUpIcon  className="size-4 text-muted-foreground" />
+            <CaretCircleUpIcon className="size-4 text-muted-foreground" />
           </>
         ) : null}
       </DropdownMenuTrigger>
@@ -139,7 +137,7 @@ export function UserMenu({
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem variant="destructive" onClick={handleSignOut}>
-            <SignOutIcon  />
+            <SignOutIcon />
             Log out
           </DropdownMenuItem>
         </DropdownMenuGroup>
@@ -149,7 +147,6 @@ export function UserMenu({
 }
 
 type UserMenuWithSessionProps = Omit<UserMenuProps, "user">;
-
 
 export function UserMenuWithSession(props: UserMenuWithSessionProps) {
   const { data: session, isPending } = authClient.useSession();

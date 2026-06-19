@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutIcon ,
+  LayoutIcon,
   GitBranch,
   GitPullRequest,
   ChartBar,
@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/sidebar";
 
 const NAV_ICONS = {
-  "layout-dashboard": LayoutIcon ,
+  "layout-dashboard": LayoutIcon,
   "folder-git-2": GitBranch,
   "git-pull-request": GitPullRequest,
   "chart-bar": ChartBar,

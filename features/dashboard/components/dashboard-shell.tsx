@@ -1,6 +1,5 @@
-
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { DashboardSidebar } from "@/features/dashboard/components/dashboard-sidebar"
+import { DashboardSidebar } from "@/features/dashboard/components/dashboard-sidebar";
 import {
   SidebarInset,
   SidebarProvider,
