@@ -1,12 +1,12 @@
 import type { ComponentType } from "react";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRightIcon } from "@phosphor-icons/react";
 
 type DownloadCardProps = {
   title: string;
   description: string;
   href: string;
   fileLabel?: string;
-  icon: ComponentType<{ className?: string; strokeWidth?: number }>;
+  icon: ComponentType<{ className?: string }>;
   highlight?: boolean;
 };
 
@@ -32,9 +32,9 @@ export function DownloadCard({
     >
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#8d6e9e]/15 ring-1 ring-[#8d6e9e]/30">
-          <Icon className="h-5 w-5 text-[#d1c6d6]" strokeWidth={1.75} />
+          <Icon className="h-5 w-5 text-[#d1c6d6]" />
         </div>
-        <ArrowUpRight
+        <ArrowUpRightIcon
           className="h-4 w-4 shrink-0 text-zinc-600 transition group-hover:text-[#b29bbd]"
           aria-hidden
         />

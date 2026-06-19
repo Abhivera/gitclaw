@@ -1,11 +1,8 @@
 import { requireAuth } from "@/features/auth/actions";
-import { updateSlackWebhook } from "@/features/dashboard/actions/settings";
 import { getSettingsData } from "@/features/dashboard/server/settings-queries";
 import { DashboardHeader } from "@/features/dashboard/components/dashboard-header";
-import { Button } from "@/components/ui/button";
+import { SlackWebhookForm } from "@/features/dashboard/components/slack-webhook-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -62,30 +59,9 @@ const SettingsPage = async () => {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Slack notifications</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form action={updateSlackWebhook} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="slackWebhookUrl">Incoming webhook URL</Label>
-                <Input
-                  id="slackWebhookUrl"
-                  name="slackWebhookUrl"
-                  type="url"
-                  placeholder="https://hooks.slack.com/services/..."
-                  defaultValue={organization.slackWebhookUrl ?? ""}
-                />
-                <p className="text-xs text-muted-foreground">
-                  GitClaw posts a summary when a review completes. Leave blank to
-                  disable.
-                </p>
-              </div>
-              <Button type="submit">Save notifications</Button>
-            </form>
-          </CardContent>
-        </Card>
+        <SlackWebhookForm
+          defaultValue={organization.slackWebhookUrl ?? ""}
+        />
       </div>
     </>
   );

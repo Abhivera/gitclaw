@@ -1,0 +1,45 @@
+name: Feature request
+description: Suggest an idea for GitClaw
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a feature. For small fixes, a pull request is often faster than an issue.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: What problem does this solve, or what workflow would it improve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: How would you like this to work?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any workarounds or other approaches you considered.
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Area
+      options:
+        - AI review quality
+        - Git provider integration
+        - Dashboard / UX
+        - Configuration (.gitclaw.yaml)
+        - Self-hosting / deployment
+        - Other
+    validations:
+      required: true

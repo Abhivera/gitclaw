@@ -40,7 +40,7 @@ export const landingMetadata: Metadata = {
       "Open-source AI reviewer for GitHub, GitLab, and Bitbucket. Automatic PR analysis with feedback on code quality, security, performance, and maintainability — on your own infrastructure.",
     images: [
       {
-        url: `${siteUrl}/white-icon-black-bg.png`,
+        url: `${siteUrl}/logo2.svg`,
         alt: "GitClaw logo — self-hosted AI code reviewer",
       },
     ],
@@ -51,21 +51,11 @@ export const landingMetadata: Metadata = {
     title: "GitClaw — Self-hosted AI code reviewer",
     description:
       "Automatically analyze pull requests with AI. Code quality, security, performance, and maintainability feedback for GitHub, GitLab, and Bitbucket.",
-    images: [`${siteUrl}/white-icon-black-bg.png`],
+    images: [`${siteUrl}/logo2.svg`],
   },
   icons: {
-    icon: [
-      {
-        url: "/black-icon-white-bg.png",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: "/white-icon-black-bg.png",
-        media: "(prefers-color-scheme: dark)",
-      },
-      { url: "/white-icon-black-bg.png" },
-    ],
-    apple: "/black-icon-white-bg.png",
+    icon: [{ url: "/logo2.svg" }],
+    apple: "/logo2.svg",
   },
   other: {
     "theme-color": "#070a0f",

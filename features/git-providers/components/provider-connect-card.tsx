@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { CopyButton } from "@/components/ui/copy-button";
 import type { ProviderConnectionStatus } from "@/features/git-providers/types";
 import {
   statusBadge,
@@ -65,14 +66,20 @@ function WebhookSetup({
         request / pull request events.
       </p>
       <div className="space-y-1">
-        <p className="text-muted-foreground">Webhook URL</p>
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-muted-foreground">Webhook URL</p>
+          <CopyButton value={webhookUrl} label="Copy URL" />
+        </div>
         <code className="block break-all rounded-none bg-background px-2 py-1 text-[11px]">
           {webhookUrl}
         </code>
       </div>
       {webhookSecret ? (
         <div className="space-y-1">
-          <p className="text-muted-foreground">Secret token</p>
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-muted-foreground">Secret token</p>
+            <CopyButton value={webhookSecret} label="Copy secret" />
+          </div>
           <code className="block break-all rounded-none bg-background px-2 py-1 text-[11px]">
             {webhookSecret}
           </code>

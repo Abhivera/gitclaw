@@ -36,7 +36,7 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
                   <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-none bg-sidebar">
                     <Image
                       src="/logo2.svg"
-                      alt=""
+                      alt="GitClaw logo"
                       width={62}
                       height={62}
                       className="object-contain"

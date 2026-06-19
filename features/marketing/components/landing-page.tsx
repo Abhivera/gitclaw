@@ -4,15 +4,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
 import {
-  Apple,
-  ArrowUpRight,
-  Bot,
-  GitPullRequest,
-  Shield,
-  Sparkles,
-  Terminal,
-  Wrench,
-} from "lucide-react";
+  AppleLogoIcon,
+  ArrowUpRightIcon,
+  GitPullRequestIcon,
+  RobotIcon,
+  ShieldIcon,
+  SparkleIcon,
+  TerminalIcon,
+  WrenchIcon,
+} from "@phosphor-icons/react";
 import { DownloadCard } from "@/features/marketing/components/download-card";
 import { WindowsIcon } from "@/features/marketing/components/windows-icon";
 import {
@@ -67,10 +67,10 @@ export function LandingPage({ initialRelease }: LandingPageProps) {
           <div className="mb-6 flex justify-center">
             <div className="rounded-2xl bg-black/30 p-4 ring-1 ring-white/[0.08] shadow-lg shadow-black/40 sm:p-5">
               <Image
-                src="/white-icon-black-bg.png"
+                src="/logo2.svg"
                 alt="GitClaw"
                 width={260}
-                height={120}
+                height={174}
                 className="mx-auto h-auto w-[min(100%,220px)] object-contain sm:w-[260px]"
                 priority
               />
@@ -117,7 +117,7 @@ export function LandingPage({ initialRelease }: LandingPageProps) {
               className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-zinc-300 transition hover:border-[#8d6e9e]/35 hover:text-white"
             >
               Open source on GitHub
-              <ArrowUpRight className="h-3.5 w-3.5 opacity-70" aria-hidden />
+              <ArrowUpRightIcon className="h-3.5 w-3.5 opacity-70" aria-hidden />
             </a>
             <a
               href={URLS.releasesLatest}
@@ -143,7 +143,7 @@ export function LandingPage({ initialRelease }: LandingPageProps) {
           <ul className="mx-auto mt-5 max-w-xl space-y-3 text-sm leading-relaxed text-zinc-400">
             <li className="flex gap-3">
               <span className="mt-0.5 shrink-0 text-[#8d6e9e]" aria-hidden>
-                <GitPullRequest className="h-4 w-4" strokeWidth={2} />
+                <GitPullRequestIcon className="h-4 w-4" />
               </span>
               <span>
                 <strong className="text-zinc-300">Automatic PR analysis</strong> — hooks into new
@@ -153,7 +153,7 @@ export function LandingPage({ initialRelease }: LandingPageProps) {
             </li>
             <li className="flex gap-3">
               <span className="mt-0.5 shrink-0 text-[#8d6e9e]" aria-hidden>
-                <Shield className="h-4 w-4" strokeWidth={2} />
+                <ShieldIcon className="h-4 w-4" />
               </span>
               <span>
                 <strong className="text-zinc-300">Security &amp; code quality</strong> — surfaces
@@ -162,7 +162,7 @@ export function LandingPage({ initialRelease }: LandingPageProps) {
             </li>
             <li className="flex gap-3">
               <span className="mt-0.5 shrink-0 text-[#8d6e9e]" aria-hidden>
-                <Sparkles className="h-4 w-4" strokeWidth={2} />
+                <SparkleIcon className="h-4 w-4" />
               </span>
               <span>
                 <strong className="text-zinc-300">Performance insights</strong> — flags inefficient
@@ -171,7 +171,7 @@ export function LandingPage({ initialRelease }: LandingPageProps) {
             </li>
             <li className="flex gap-3">
               <span className="mt-0.5 shrink-0 text-[#8d6e9e]" aria-hidden>
-                <Wrench className="h-4 w-4" strokeWidth={2} />
+                <WrenchIcon className="h-4 w-4" />
               </span>
               <span>
                 <strong className="text-zinc-300">Maintainability feedback</strong> — highlights
@@ -180,7 +180,7 @@ export function LandingPage({ initialRelease }: LandingPageProps) {
             </li>
             <li className="flex gap-3">
               <span className="mt-0.5 shrink-0 text-[#8d6e9e]" aria-hidden>
-                <Bot className="h-4 w-4" strokeWidth={2} />
+                <RobotIcon className="h-4 w-4" />
               </span>
               <span>
                 <strong className="text-zinc-300">Self-hosted &amp; multi-forge</strong> — run on
@@ -196,7 +196,7 @@ export function LandingPage({ initialRelease }: LandingPageProps) {
           className="mb-14 rounded-2xl border border-white/[0.08] bg-[#0a0e14]/90 p-6 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]"
         >
           <div className="mb-4 flex items-center gap-2 text-[#b29bbd]">
-            <Terminal className="h-4 w-4" aria-hidden />
+            <TerminalIcon className="h-4 w-4" aria-hidden />
             <h2 id="self-host-heading" className="text-sm font-medium">
               Self-host on your infrastructure
             </h2>
@@ -267,7 +267,7 @@ export function LandingPage({ initialRelease }: LandingPageProps) {
               description="Disk image (.dmg). Open and drag GitClaw into Applications."
               href={release?.macos?.url ?? URLS.releasesLatest}
               fileLabel={release?.macos?.name}
-              icon={Apple}
+              icon={AppleLogoIcon}
               highlight={suggested("macos")}
             />
             <DownloadCard
@@ -275,7 +275,7 @@ export function LandingPage({ initialRelease }: LandingPageProps) {
               description="Portable binary. chmod +x then run."
               href={release?.linuxAppImage?.url ?? URLS.releasesLatest}
               fileLabel={release?.linuxAppImage?.name}
-              icon={Bot}
+              icon={RobotIcon}
               highlight={suggested("linux")}
             />
             <DownloadCard
@@ -283,7 +283,7 @@ export function LandingPage({ initialRelease }: LandingPageProps) {
               description="For Debian / Ubuntu. Install with your package manager."
               href={release?.linuxDeb?.url ?? URLS.releasesLatest}
               fileLabel={release?.linuxDeb?.name}
-              icon={Bot}
+              icon={RobotIcon}
               highlight={false}
             />
           </div>

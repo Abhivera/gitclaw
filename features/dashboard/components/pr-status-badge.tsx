@@ -1,3 +1,4 @@
+import { getStatusLabel } from "@/features/dashboard/lib/status-labels";
 import { statusBadge } from "@/features/dashboard/lib/status-style";
 
 const STATUS_TONE: Record<
@@ -13,5 +14,5 @@ const STATUS_TONE: Record<
 
 export function PrStatusBadge({ status }: { status: string }) {
   const tone = STATUS_TONE[status] ?? "neutral";
-  return <span className={statusBadge(tone)}>{status}</span>;
+  return <span className={statusBadge(tone)}>{getStatusLabel(status)}</span>;
 }

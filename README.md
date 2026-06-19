@@ -1,5 +1,8 @@
 # GitClaw
 
+[![CI](https://github.com/Abhivera/gitclaw/actions/workflows/ci.yml/badge.svg)](https://github.com/Abhivera/gitclaw/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 Open-source AI pull request reviewer for **GitHub**, **GitLab**, and **Bitbucket**. Connect a provider from the dashboard and every opened or updated PR gets an automated review — summary plus inline comments covering correctness, security, performance, and maintainability. Free to self-host.
 
 ## Features
@@ -60,7 +63,7 @@ flowchart LR
 ## Quick start (Docker)
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/Abhivera/gitclaw.git
 cd gitclaw
 cp .env.example .env
 # Fill in .env (see Environment variables below)
@@ -76,7 +79,7 @@ The compose stack runs Postgres + the app. Migrations apply automatically on con
 ### 1. Clone and install
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/Abhivera/gitclaw.git
 cd gitclaw
 npm install
 ```
@@ -229,6 +232,14 @@ proxy.ts                     # Route protection (sign-in / dashboard)
 | `/api/bitbucket/callback` | GET | Bitbucket OAuth callback |
 | `/api/bitbucket/webhook/[connectionId]` | POST | Bitbucket repo webhook |
 
+## Contributing
+
+Contributions are welcome. See [CONTRIBUTING.md](./CONTRIBUTING.md) for setup and pull request guidelines.
+
+## Security
+
+To report a vulnerability, see [SECURITY.md](./SECURITY.md). Please do not open public issues for security problems.
+
 ## License
 
-Open source — free to use, modify, and self-host.
+[MIT License](./LICENSE) — free to use, modify, and self-host.

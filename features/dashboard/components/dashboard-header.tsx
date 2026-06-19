@@ -9,6 +9,7 @@
 
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { ThemeToggle } from "@/features/dashboard/components/theme-toggle";
 
 type DashboardHeaderProps = {
   title: string;
@@ -28,12 +29,13 @@ export function DashboardHeader({ title, description }: DashboardHeaderProps) {
       {/* Opens/closes the sidebar on smaller screens or icon-collapsed mode */}
       <SidebarTrigger className="-ml-1" />
       <Separator orientation="vertical" className="mr-2 h-4" />
-      <div className="flex min-w-0 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col">
         <h1 className="truncate text-sm font-medium">{title}</h1>
         {description ? (
           <p className="truncate text-xs text-muted-foreground">{description}</p>
         ) : null}
       </div>
+      <ThemeToggle />
     </header>
   );
 }

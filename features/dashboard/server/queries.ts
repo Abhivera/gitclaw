@@ -5,6 +5,10 @@ import {
   syncRepositoriesFromProvider,
   syncRepositoriesFromPullRequests,
 } from "@/features/repositories/server/sync-repositories";
+import {
+  DASHBOARD_PAGE_SIZE,
+  getPaginationMeta,
+} from "@/features/dashboard/lib/pagination";
 
 export async function getDashboardOverview(userId: string) {
   const { org, connectionIds } = await getOrgConnectionIds(userId);
@@ -58,7 +62,10 @@ export async function getDashboardOverview(userId: string) {
   };
 }
 
-export async function getDashboardRepositories(userId: string) {
+export async function getDashboardRepositories(
+  userId: string,
+  page = 1
+) {
   const { org, connectionIds } = await getOrgConnectionIds(userId);
 
   const connections = await prisma.providerConnection.findMany({
@@ -78,29 +85,51 @@ export async function getDashboardRepositories(userId: string) {
     }
   }
 
-  return prisma.repository.findMany({
-    where: { connectionId: { in: connectionIds } },
+  const where = { connectionId: { in: connectionIds } };
+  const total = await prisma.repository.count({ where });
+  const { skip, totalPages, page: safePage } = getPaginationMeta(total, page);
+
+  const items = await prisma.repository.findMany({
+    where,
     orderBy: { fullName: "asc" },
+    skip,
+    take: DASHBOARD_PAGE_SIZE,
     include: {
       _count: { select: { pullRequests: true } },
     },
   });
+
+  return {
+    items,
+    total,
+    page: safePage,
+    pageSize: DASHBOARD_PAGE_SIZE,
+    totalPages,
+  };
 }
 
 export async function getDashboardPullRequests(
   userId: string,
-  filters?: { status?: string; repo?: string }
+  filters?: { status?: string; repo?: string; page?: number }
 ) {
   const { connectionIds } = await getOrgConnectionIds(userId);
+  const where = {
+    connectionId: { in: connectionIds },
+    ...(filters?.status ? { status: filters.status } : {}),
+    ...(filters?.repo ? { repoFullName: filters.repo } : {}),
+  };
 
-  return prisma.pullRequest.findMany({
-    where: {
-      connectionId: { in: connectionIds },
-      ...(filters?.status ? { status: filters.status } : {}),
-      ...(filters?.repo ? { repoFullName: filters.repo } : {}),
-    },
+  const total = await prisma.pullRequest.count({ where });
+  const { skip, totalPages, page } = getPaginationMeta(
+    total,
+    filters?.page ?? 1
+  );
+
+  const items = await prisma.pullRequest.findMany({
+    where,
     orderBy: { updatedAt: "desc" },
-    take: 100,
+    skip,
+    take: DASHBOARD_PAGE_SIZE,
     select: {
       id: true,
       title: true,
@@ -114,6 +143,46 @@ export async function getDashboardPullRequests(
       reviewedAt: true,
       updatedAt: true,
       createdAt: true,
+    },
+  });
+
+  return {
+    items,
+    total,
+    page,
+    pageSize: DASHBOARD_PAGE_SIZE,
+    totalPages,
+  };
+}
+
+export async function getPullRequestRepoOptions(userId: string) {
+  const { connectionIds } = await getOrgConnectionIds(userId);
+
+  const repos = await prisma.pullRequest.findMany({
+    where: { connectionId: { in: connectionIds } },
+    select: { repoFullName: true },
+    distinct: ["repoFullName"],
+    orderBy: { repoFullName: "asc" },
+  });
+
+  return repos.map((repo) => repo.repoFullName);
+}
+
+export async function getPullRequestStatus(
+  userId: string,
+  pullRequestId: string
+) {
+  const { connectionIds } = await getOrgConnectionIds(userId);
+
+  return prisma.pullRequest.findFirst({
+    where: {
+      id: pullRequestId,
+      connectionId: { in: connectionIds },
+    },
+    select: {
+      status: true,
+      reviewRunCount: true,
+      reviewedAt: true,
     },
   });
 }

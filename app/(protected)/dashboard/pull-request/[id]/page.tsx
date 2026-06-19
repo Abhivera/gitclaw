@@ -1,7 +1,8 @@
 import { requireAuth } from "@/features/auth/actions";
 import { DashboardHeader } from "@/features/dashboard/components/dashboard-header";
-import { PrStatusBadge } from "@/features/dashboard/components/pr-status-badge";
-import { RerunReviewButton } from "@/features/dashboard/components/rerun-review-button";
+import { MarkdownContent } from "@/features/dashboard/components/markdown-content";
+import { PullRequestStatusSection } from "@/features/dashboard/components/pull-request-status-section";
+import { SeverityBadge } from "@/features/dashboard/components/severity-badge";
 import { DASHBOARD_ROUTES } from "@/features/dashboard/lib/routes";
 import { getPullRequestDetail } from "@/features/dashboard/server/queries";
 import { getPullRequestUrl } from "@/features/git-providers/lib/pr-url";
@@ -30,6 +31,12 @@ const PullRequestDetailPage = async ({ params }: PageProps) => {
   }
 
   const findings = (pullRequest.reviewFindings as ReviewFinding[] | null) ?? [];
+  const sortedFindings = [...findings].sort((a, b) => {
+    if (a.severity === b.severity) {
+      return 0;
+    }
+    return a.severity === "issue" ? -1 : 1;
+  });
   const hostUrl = getPullRequestUrl(
     pullRequest.provider,
     pullRequest.repoFullName,
@@ -44,7 +51,11 @@ const PullRequestDetailPage = async ({ params }: PageProps) => {
       />
       <div className="flex flex-1 flex-col gap-6 p-6">
         <div className="flex flex-wrap items-center gap-3">
-          <PrStatusBadge status={pullRequest.status} />
+          <PullRequestStatusSection
+            key={pullRequest.status}
+            pullRequestId={pullRequest.id}
+            initialStatus={pullRequest.status}
+          />
           <span className="text-sm text-muted-foreground capitalize">
             {pullRequest.provider}
           </span>
@@ -61,7 +72,6 @@ const PullRequestDetailPage = async ({ params }: PageProps) => {
           >
             Open on git host
           </a>
-          <RerunReviewButton pullRequestId={pullRequest.id} />
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
@@ -116,35 +126,25 @@ const PullRequestDetailPage = async ({ params }: PageProps) => {
               <CardTitle>Review summary</CardTitle>
             </CardHeader>
             <CardContent>
-              <pre className="whitespace-pre-wrap text-sm">
-                {pullRequest.reviewComment}
-              </pre>
+              <MarkdownContent content={pullRequest.reviewComment} />
             </CardContent>
           </Card>
         ) : null}
 
-        {findings.length > 0 ? (
+        {sortedFindings.length > 0 ? (
           <Card>
             <CardHeader>
-              <CardTitle>Findings ({findings.length})</CardTitle>
+              <CardTitle>Findings ({sortedFindings.length})</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {findings.map((finding, index) => (
+              {sortedFindings.map((finding, index) => (
                 <div
                   key={`${finding.file}-${finding.line}-${index}`}
                   className="rounded-md border border-border p-3"
                 >
-                  <div className="flex items-center gap-2 text-sm font-medium">
-                    <span
-                      className={
-                        finding.severity === "issue"
-                          ? "text-red-600 dark:text-red-400"
-                          : "text-amber-600 dark:text-amber-400"
-                      }
-                    >
-                      {finding.severity}
-                    </span>
-                    <code>
+                  <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
+                    <SeverityBadge severity={finding.severity} />
+                    <code className="text-xs text-muted-foreground">
                       {finding.file}:{finding.line}
                     </code>
                   </div>

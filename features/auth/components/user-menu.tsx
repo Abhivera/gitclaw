@@ -145,15 +145,3 @@ export function UserMenu({
     </DropdownMenu>
   );
 }
-
-type UserMenuWithSessionProps = Omit<UserMenuProps, "user">;
-
-export function UserMenuWithSession(props: UserMenuWithSessionProps) {
-  const { data: session, isPending } = authClient.useSession();
-
-  if (isPending || !session?.user) {
-    return null;
-  }
-
-  return <UserMenu user={session.user} {...props} />;
-}
