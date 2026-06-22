@@ -16,7 +16,8 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "clean": "node -e \"const fs=require('fs');['.next','out'].forEach(p=>fs.rmSync(p,{recursive:true,force:true}));try{fs.rmSync('tsconfig.tsbuildinfo')}catch{}\""
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^2.0.51",

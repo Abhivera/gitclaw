@@ -236,10 +236,6 @@ proxy.ts                     # Route protection (sign-in / dashboard)
 
 Contributions are welcome. See [CONTRIBUTING.md](./CONTRIBUTING.md) for setup and pull request guidelines.
 
-## Security
-
-To report a vulnerability, see [SECURITY.md](./SECURITY.md). Please do not open public issues for security problems.
-
 ## License
 
 [MIT License](./LICENSE) — free to use, modify, and self-host.
