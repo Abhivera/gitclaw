@@ -86,7 +86,10 @@ export const landingJsonLd = {
     "Inline review comments on GitHub, GitLab, and Bitbucket",
     "Code quality and security feedback",
     "Performance and maintainability insights",
-    "Self-hosted on your own infrastructure",
+    "PR chat via @gitclaw mentions",
+    "Per-repo configuration with .gitclaw.yaml",
+    "Dashboard with analytics and team management",
+    "Self-hosted with pluggable AI providers",
     "Support for GitLab self-managed instances",
   ],
 } as const;

@@ -1,56 +1,29 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { useSyncExternalStore } from "react";
 import {
-  AppleLogoIcon,
   ArrowUpRightIcon,
+  ChartLineIcon,
+  ChatCircleDotsIcon,
+  FileCodeIcon,
   GitPullRequestIcon,
   RobotIcon,
   ShieldIcon,
   SparkleIcon,
-  TerminalIcon,
   WrenchIcon,
-} from "@phosphor-icons/react";
-import { DownloadCard } from "@/features/marketing/components/download-card";
-import { WindowsIcon } from "@/features/marketing/components/windows-icon";
+} from "@phosphor-icons/react/dist/ssr";
+import { DownloadSection } from "@/features/marketing/components/download-section";
+import { QuickStartSection } from "@/features/marketing/components/quick-start-section";
 import {
-  detectPlatform,
   REPO,
-  type PlatformKey,
   type ReleaseDownloads,
   URLS,
 } from "@/features/marketing/lib/releases";
 
 type LandingPageProps = {
-  initialRelease: ReleaseDownloads | null;
+  initialRelease?: ReleaseDownloads | null;
 };
 
-function subscribeToPlatform() {
-  return () => {};
-}
-
-function getServerPlatform(): PlatformKey {
-  return "linux";
-}
-
-function getClientPlatform(): PlatformKey {
-  return detectPlatform();
-}
-
 export function LandingPage({ initialRelease }: LandingPageProps) {
-  const platform = useSyncExternalStore(
-    subscribeToPlatform,
-    getClientPlatform,
-    getServerPlatform,
-  );
-  const release = initialRelease;
-
-  function suggested(p: PlatformKey): boolean {
-    return platform === p;
-  }
-
   return (
     <div className="marketing-landing min-h-screen bg-[#070a0f] text-zinc-100">
       <div
@@ -138,7 +111,7 @@ export function LandingPage({ initialRelease }: LandingPageProps) {
             id="features-heading"
             className="text-center text-base font-semibold tracking-tight text-white"
           >
-            AI reviews where your team already works
+            Why teams use GitClaw
           </h2>
           <ul className="mx-auto mt-5 max-w-xl space-y-3 text-sm leading-relaxed text-zinc-400">
             <li className="flex gap-3">
@@ -146,9 +119,8 @@ export function LandingPage({ initialRelease }: LandingPageProps) {
                 <GitPullRequestIcon className="h-4 w-4" />
               </span>
               <span>
-                <strong className="text-zinc-300">Automatic PR analysis</strong> — hooks into new
-                and updated pull requests, reads the diff, and posts inline comments on the lines
-                that matter.
+                <strong className="text-zinc-300">Automatic PR reviews</strong> — webhooks on open
+                and update, incremental diffs, and inline comments on the lines that matter.
               </span>
             </li>
             <li className="flex gap-3">
@@ -180,114 +152,48 @@ export function LandingPage({ initialRelease }: LandingPageProps) {
             </li>
             <li className="flex gap-3">
               <span className="mt-0.5 shrink-0 text-[#8d6e9e]" aria-hidden>
+                <ChatCircleDotsIcon className="h-4 w-4" />
+              </span>
+              <span>
+                <strong className="text-zinc-300">PR chat</strong> — reply to{" "}
+                <code className="text-zinc-300">@gitclaw</code> in comments for follow-up questions
+                on the review.
+              </span>
+            </li>
+            <li className="flex gap-3">
+              <span className="mt-0.5 shrink-0 text-[#8d6e9e]" aria-hidden>
+                <FileCodeIcon className="h-4 w-4" />
+              </span>
+              <span>
+                <strong className="text-zinc-300">Per-repo config</strong> — tune ignore paths, tone,
+                and instructions with <code className="text-zinc-300">.gitclaw.yaml</code> in each
+                repository.
+              </span>
+            </li>
+            <li className="flex gap-3">
+              <span className="mt-0.5 shrink-0 text-[#8d6e9e]" aria-hidden>
+                <ChartLineIcon className="h-4 w-4" />
+              </span>
+              <span>
+                <strong className="text-zinc-300">Dashboard &amp; analytics</strong> — manage
+                integrations, track reviews, and monitor findings across repos and teams.
+              </span>
+            </li>
+            <li className="flex gap-3">
+              <span className="mt-0.5 shrink-0 text-[#8d6e9e]" aria-hidden>
                 <RobotIcon className="h-4 w-4" />
               </span>
               <span>
-                <strong className="text-zinc-300">Self-hosted &amp; multi-forge</strong> — run on
-                your own servers with your models and keys. Works with GitHub, GitLab (including
-                self-managed), and Bitbucket.
+                <strong className="text-zinc-300">Self-hosted &amp; pluggable AI</strong> — run on
+                your servers with OpenRouter, Groq, or any OpenAI-compatible model (including Ollama).
               </span>
             </li>
           </ul>
         </section>
 
-        <section
-          aria-labelledby="self-host-heading"
-          className="mb-14 rounded-2xl border border-white/[0.08] bg-[#0a0e14]/90 p-6 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]"
-        >
-          <div className="mb-4 flex items-center gap-2 text-[#b29bbd]">
-            <TerminalIcon className="h-4 w-4" aria-hidden />
-            <h2 id="self-host-heading" className="text-sm font-medium">
-              Self-host on your infrastructure
-            </h2>
-          </div>
-          <p className="text-sm leading-relaxed text-zinc-400">
-            Download the desktop server for your platform below, or clone the repo and follow the
-            setup guide to connect your forge and start reviewing pull requests in minutes.
-          </p>
-          <pre className="mt-4 overflow-x-auto rounded-xl bg-black/40 p-4 font-mono text-xs leading-relaxed text-zinc-300 ring-1 ring-white/[0.06] sm:text-sm">
-            {`git clone https://github.com/${REPO}.git\ncd gitclaw\n# See README for forge webhooks, API keys, and model config`}
-          </pre>
-          <p className="mt-4 text-xs text-zinc-600">
-            Full instructions in the{" "}
-            <a
-              href={URLS.repo}
-              className="text-[#8d6e9e] hover:underline"
-              target="_blank"
-              rel="noreferrer"
-            >
-              open-source repository
-            </a>
-            .
-          </p>
-        </section>
+        <QuickStartSection />
 
-        <section aria-labelledby="download-heading" className="mb-14">
-          <h2 id="download-heading" className="mb-2 text-center text-sm font-medium text-[#b29bbd]">
-            Download
-          </h2>
-          <p className="mb-6 text-center text-sm text-zinc-500">
-            Install GitClaw on Windows, macOS, or Linux to run your self-hosted AI reviewer locally.
-          </p>
-          {release === null && (
-            <p className="mb-4 text-center text-sm leading-relaxed text-zinc-500">
-              No release with installer files on GitHub yet — the cards below open{" "}
-              <a
-                href={URLS.releasesLatest}
-                className="text-zinc-400 underline decoration-white/15 underline-offset-2 hover:text-[#b29bbd]"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Releases
-              </a>
-              . Push a version tag (e.g. <code className="text-zinc-400">v1.0.0</code>) to build
-              artifacts, or run from source via the{" "}
-              <a
-                href={URLS.repo}
-                className="text-zinc-400 underline decoration-white/15 underline-offset-2 hover:text-[#b29bbd]"
-                target="_blank"
-                rel="noreferrer"
-              >
-                repo
-              </a>
-              .
-            </p>
-          )}
-          <div className="grid gap-4 sm:grid-cols-2">
-            <DownloadCard
-              title="Windows"
-              description="NSIS installer (.exe) for running GitClaw on Windows."
-              href={release?.windows?.url ?? URLS.releasesLatest}
-              fileLabel={release?.windows?.name}
-              icon={WindowsIcon}
-              highlight={suggested("windows")}
-            />
-            <DownloadCard
-              title="macOS"
-              description="Disk image (.dmg). Open and drag GitClaw into Applications."
-              href={release?.macos?.url ?? URLS.releasesLatest}
-              fileLabel={release?.macos?.name}
-              icon={AppleLogoIcon}
-              highlight={suggested("macos")}
-            />
-            <DownloadCard
-              title="Linux (AppImage)"
-              description="Portable binary. chmod +x then run."
-              href={release?.linuxAppImage?.url ?? URLS.releasesLatest}
-              fileLabel={release?.linuxAppImage?.name}
-              icon={RobotIcon}
-              highlight={suggested("linux")}
-            />
-            <DownloadCard
-              title="Linux (.deb)"
-              description="For Debian / Ubuntu. Install with your package manager."
-              href={release?.linuxDeb?.url ?? URLS.releasesLatest}
-              fileLabel={release?.linuxDeb?.name}
-              icon={RobotIcon}
-              highlight={false}
-            />
-          </div>
-        </section>
+        <DownloadSection initialRelease={initialRelease} />
 
         <footer className="mt-16 text-center text-xs text-zinc-600">
           <p>
