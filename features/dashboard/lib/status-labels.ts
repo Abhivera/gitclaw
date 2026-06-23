@@ -1,4 +1,4 @@
-export const PR_STATUS_LABELS: Record<string, string> = {
+const PR_STATUS_LABELS: Record<string, string> = {
   reviewed: "Reviewed",
   processing: "Processing",
   pending: "Pending",

@@ -1,0 +1,80 @@
+name: Release Desktop
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-desktop-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            npm_config_arch: x64
+          - os: macos-latest
+            npm_config_arch: x64
+          - os: ubuntu-latest
+            npm_config_arch: x64
+
+    env:
+      BETTER_AUTH_SECRET: desktop-release-build-placeholder
+      BETTER_AUTH_URL: http://127.0.0.1:13100
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:15432/gitclaw
+      GITHUB_CLIENT_ID: desktop-release-placeholder
+      GITHUB_CLIENT_SECRET: desktop-release-placeholder
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Build standalone Next.js bundle
+        run: npm run desktop:build:next
+
+      - name: Install desktop dependencies
+        run: npm ci --prefix desktop
+
+      - name: Package desktop app
+        run: npm run dist --prefix desktop
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ matrix.os }}
+          path: release/desktop/*
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: artifacts/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

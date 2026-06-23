@@ -15,8 +15,10 @@ function parseAllowedDevOrigins(): string[] | undefined {
 }
 
 const allowedDevOrigins = parseAllowedDevOrigins();
+const isDesktopBuild = process.env.DESKTOP_BUILD === "1";
 
 const nextConfig: NextConfig = {
+  ...(isDesktopBuild ? { output: "standalone" as const } : {}),
   typedRoutes: true,
   // pg-boss (and its pg driver) must run as a native Node dependency, not be
   // bundled by the server compiler.

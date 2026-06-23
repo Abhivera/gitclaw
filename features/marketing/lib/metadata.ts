@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { REPO, URLS } from "./releases";
+import { URLS } from "./releases";
 
 const siteUrl = process.env.BETTER_AUTH_URL ?? "https://gitclaw.online";
 
@@ -93,5 +93,3 @@ export const landingJsonLd = {
     "Support for GitLab self-managed instances",
   ],
 } as const;
-
-export { REPO, URLS };

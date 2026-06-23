@@ -58,7 +58,7 @@ export async function getConnectionByExternalId(
   return toConnectionRecord(freshConnection);
 }
 
-export async function getOrgConnection(organizationId: string, provider: GitProvider) {
+async function getOrgConnection(organizationId: string, provider: GitProvider) {
   const connection = await prisma.providerConnection.findUnique({
     where: {
       organizationId_provider: { organizationId, provider },

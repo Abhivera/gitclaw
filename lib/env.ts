@@ -51,10 +51,6 @@ export class ConfigError extends Error {
   }
 }
 
-export function isConfigError(error: unknown): error is ConfigError {
-  return error instanceof ConfigError;
-}
-
 function formatIssues(issues: z.core.$ZodIssue[]): string {
   const lines = issues.map((issue) => {
     const key = issue.path.join(".") || "(root)";

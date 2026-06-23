@@ -1,0 +1,90 @@
+{
+  "name": "gitclaw-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "GitClaw desktop app — self-hosted AI PR reviewer",
+  "main": "main.mjs",
+  "type": "module",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --publish never",
+    "dist:dir": "electron-builder --dir --publish never"
+  },
+  "dependencies": {
+    "embedded-postgres": "17.10.0-beta.17"
+  },
+  "devDependencies": {
+    "electron": "^34.5.8",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.gitclaw.app",
+    "productName": "GitClaw",
+    "copyright": "Copyright © GitClaw contributors",
+    "directories": {
+      "output": "../release/desktop"
+    },
+    "files": [
+      "main.mjs",
+      "preload.mjs",
+      "server.mjs",
+      "env.mjs",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../.next/standalone",
+        "to": "standalone",
+        "filter": ["**/*"]
+      }
+    ],
+    "asar": true,
+    "asarUnpack": [
+      "**/node_modules/embedded-postgres/**",
+      "**/node_modules/@embedded-postgres/**"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "signAndEditExecutable": false,
+      "artifactName": "GitClaw-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "GitClaw-Setup-${version}.${ext}"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "category": "public.app-category.developer-tools",
+      "artifactName": "GitClaw-${version}-${arch}.${ext}"
+    },
+    "dmg": {
+      "artifactName": "GitClaw-${version}-${arch}.${ext}"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": ["x64"]
+        },
+        {
+          "target": "deb",
+          "arch": ["x64"]
+        }
+      ],
+      "category": "Development",
+      "artifactName": "GitClaw-${version}-${arch}.${ext}",
+      "maintainer": "GitClaw contributors"
+    }
+  }
+}

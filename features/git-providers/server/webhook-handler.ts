@@ -98,7 +98,7 @@ export async function handleProviderWebhook(
 
   const config = await loadRepositoryConfig(connection, repository);
 
-  const existing = await findExistingPullRequest(normalized);
+  const existing = await findExistingPullRequest(connection.id, normalized);
   const gate = shouldSkipReview({
     title: normalized.title,
     authorLogin: normalized.authorLogin,

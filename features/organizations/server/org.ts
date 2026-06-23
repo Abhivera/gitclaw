@@ -69,21 +69,6 @@ export async function getOrgConnectionIds(userId: string) {
   };
 }
 
-export async function requireOrgMembership(userId: string, orgId: string) {
-  const membership = await prisma.organizationMember.findUnique({
-    where: {
-      orgId_userId: { orgId, userId },
-    },
-    include: { org: true },
-  });
-
-  if (!membership) {
-    throw new Error("Organization not found");
-  }
-
-  return membership;
-}
-
 export async function getOrganizationForConnection(connectionId: string) {
   const connection = await prisma.providerConnection.findUnique({
     where: { id: connectionId },

@@ -136,6 +136,45 @@ Open [http://localhost:3000](http://localhost:3000), sign in, and go to **Dashbo
 1. Create a Bitbucket OAuth consumer with callback `https://<your-host>/api/bitbucket/callback`.
 2. Authorize from the dashboard, then add the shown webhook URL to your repo (pull request events).
 
+## Desktop app (Windows, macOS, Linux)
+
+GitClaw ships as a native desktop app with an embedded PostgreSQL database — no Docker required.
+
+### Download installers
+
+Pre-built installers are published on [GitHub Releases](https://github.com/Abhivera/gitclaw/releases/latest):
+
+| Platform | Format |
+| --- | --- |
+| Windows | `.exe` (NSIS installer) |
+| macOS | `.dmg` (Intel + Apple Silicon) |
+| Linux | `.AppImage` or `.deb` |
+
+The landing page also lists the latest downloads when releases are available.
+
+### First launch
+
+1. Install and open GitClaw.
+2. Go to **File → Open configuration folder** and edit `.env`.
+3. Add your GitHub OAuth credentials (and AI provider keys).
+4. Restart the app, then sign in from the dashboard.
+
+The desktop app auto-generates `BETTER_AUTH_SECRET` and wires `DATABASE_URL` to a local Postgres instance stored in your user data folder.
+
+### Webhooks on desktop
+
+Git providers must reach your machine for PR reviews. Use a tunnel (ngrok, cloudflared, etc.) and set `BETTER_AUTH_URL` plus `ALLOWED_DEV_ORIGINS` in the desktop `.env` to your public tunnel URL.
+
+### Build from source
+
+```bash
+npm install
+npm run desktop:dist        # installers in release/desktop/
+npm run desktop:dev         # run unpackaged for development
+```
+
+Tag a release (`git tag v0.1.0 && git push origin v0.1.0`) to trigger the [desktop release workflow](.github/workflows/release-desktop.yml) on GitHub Actions.
+
 ## Environment variables
 
 Copy `.env.example` and set values as follows.
@@ -198,6 +237,8 @@ Copy `.env.example` and set values as follows.
 | `npm run db:push` | Push Prisma schema to the database |
 | `npm run db:migrate` | Create and apply migrations |
 | `npm run db:studio` | Open Prisma Studio |
+| `npm run desktop:dev` | Build and run the desktop app (dev) |
+| `npm run desktop:dist` | Package installers for Windows, macOS, and Linux |
 
 ## Project structure
 

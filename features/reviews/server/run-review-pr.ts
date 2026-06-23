@@ -240,6 +240,23 @@ export async function runReviewPullRequest({ pullRequestId }: PrReceivedJob) {
       data: { status: "failed" },
     });
 
+    try {
+      const connection = await getConnectionById(pullRequest.connectionId);
+      if (connection) {
+        const adapter = getProviderAdapter(pullRequest.provider);
+        await adapter.setCommitStatus(
+          connection,
+          toPullRequestRecord(pullRequest),
+          {
+            state: "failure",
+            description: "GitClaw review failed",
+          }
+        );
+      }
+    } catch (statusError) {
+      console.warn("[gitclaw] failed to set failure status", statusError);
+    }
+
     throw error;
   }
 }

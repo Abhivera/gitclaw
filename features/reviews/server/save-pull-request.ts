@@ -16,7 +16,7 @@ export async function savePullRequest(
 
   return prisma.pullRequest.upsert({
     where: {
-      provider_repoFullName_prNumber: { provider, repoFullName, prNumber },
+      connectionId_repoFullName_prNumber: { connectionId, repoFullName, prNumber },
     },
     create: {
       connectionId,
@@ -33,7 +33,6 @@ export async function savePullRequest(
       skipReason: options?.skipReason ?? null,
     },
     update: {
-      connectionId,
       repositoryId: options?.repositoryId ?? undefined,
       title: payload.title,
       headSha: payload.headSha,
@@ -44,12 +43,15 @@ export async function savePullRequest(
   });
 }
 
-export async function findExistingPullRequest(payload: NormalizedPullRequest) {
-  const { provider, repoFullName, prNumber } = payload;
+export async function findExistingPullRequest(
+  connectionId: string,
+  payload: NormalizedPullRequest
+) {
+  const { repoFullName, prNumber } = payload;
 
   return prisma.pullRequest.findUnique({
     where: {
-      provider_repoFullName_prNumber: { provider, repoFullName, prNumber },
+      connectionId_repoFullName_prNumber: { connectionId, repoFullName, prNumber },
     },
     select: {
       lastReviewedSha: true,

@@ -1,4 +1,4 @@
-export type SkipReason =
+type SkipReason =
   | "draft"
   | "skip_review_title"
   | "duplicate_sha"
@@ -18,7 +18,7 @@ const BOT_LOGIN_PATTERNS = [
 
 const SKIP_REVIEW_PATTERN = /\[skip\s*review\]/i;
 
-export function isBotAuthor(authorLogin: string | null): boolean {
+function isBotAuthor(authorLogin: string | null): boolean {
   if (!authorLogin) {
     return false;
   }

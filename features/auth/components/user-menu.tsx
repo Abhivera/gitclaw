@@ -25,7 +25,7 @@ export type UserMenuUser = {
   image?: string | null;
 };
 
-export type UserMenuTriggerVariant = "compact" | "profile"
+type UserMenuTriggerVariant = "compact" | "profile"
 
 type UserMenuProps = {
   user: UserMenuUser;
@@ -34,11 +34,11 @@ type UserMenuProps = {
   className?: string;
 };
 
-export function getDisplayName(user: UserMenuUser) {
+function getDisplayName(user: UserMenuUser) {
   return user.name?.trim() || user.email?.split("@")[0] || "User";
 }
 
-export function getInitials(user: UserMenuUser) {
+function getInitials(user: UserMenuUser) {
   const source = user.name?.trim() || user.email || "U";
   const parts = source.split(/\s+/).filter(Boolean);
 

@@ -5,7 +5,6 @@ import type { ProviderConnectionRecord } from "../types";
 import { getProviderAdapter } from "./get-adapter";
 import {
   getConnectionByExternalId,
-  getConnectionById,
 } from "./connections";
 
 export async function handleCommentWebhook(
@@ -29,23 +28,6 @@ export async function handleCommentWebhook(
   }
 
   if (!resolvedConnection) {
-    const pr = await prisma.pullRequest.findUnique({
-      where: {
-        provider_repoFullName_prNumber: {
-          provider,
-          repoFullName: normalized.repoFullName,
-          prNumber: normalized.prNumber,
-        },
-      },
-      select: { connectionId: true },
-    });
-
-    if (pr) {
-      resolvedConnection = await getConnectionById(pr.connectionId);
-    }
-  }
-
-  if (!resolvedConnection) {
     return Response.json(
       { error: "No connected account for this comment" },
       { status: 404 }
@@ -54,8 +36,8 @@ export async function handleCommentWebhook(
 
   const pullRequest = await prisma.pullRequest.findUnique({
     where: {
-      provider_repoFullName_prNumber: {
-        provider,
+      connectionId_repoFullName_prNumber: {
+        connectionId: resolvedConnection.id,
         repoFullName: normalized.repoFullName,
         prNumber: normalized.prNumber,
       },

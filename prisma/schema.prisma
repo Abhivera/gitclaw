@@ -126,7 +126,7 @@ model PullRequest {
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
 
-  @@unique([provider, repoFullName, prNumber])
+  @@unique([connectionId, repoFullName, prNumber])
   @@map("pull_request")
 }
 

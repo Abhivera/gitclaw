@@ -18,14 +18,9 @@ function getPostAuthRedirectPath(request: NextRequest): string {
   return getSafeCallbackPath(callbackUrl);
 }
 
-// "/" is always public
 // "/sign-in": logged-in users redirect away; guests process
 export async function handleAuthProxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-
-  if (pathname === "/") {
-    return NextResponse.next();
-  }
 
   if (!isCoreEnvConfigured()) {
     if (pathname === SIGN_IN_PATH) {
