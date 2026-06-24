@@ -13,7 +13,7 @@ GitClaw is an open-source, self-hosted AI pull request reviewer for **GitHub**, 
 
 Unlike SaaS code-review bots, GitClaw runs on the customer's infrastructure with their choice of AI provider (OpenRouter, Groq, Ollama, or any OpenAI-compatible API). Data stays under team control.
 
-**Positioning:** Self-hosted alternative to tools like CodeRabbit, focused on multi-forge support and operator control.
+**Positioning:** Self-hosted AI pull request reviewer with multi-forge support and full operator control.
 
 ---
 

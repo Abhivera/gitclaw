@@ -1,16 +1,14 @@
 import type { Metadata } from "next";
 
-/** Dark claw on white — favicon / UI on light backgrounds */
+/** Dark claw on white for UI on light backgrounds */
 export const BRAND_ICON_LIGHT = "/black-icon-white-bg.png";
 
-/** White claw on black — favicon / UI on dark backgrounds */
+/** White claw on black for favicon, dark UI, and social previews */
 export const BRAND_ICON_DARK = "/white-icon-black-bg.png";
 
 export const brandMetadataIcons: NonNullable<Metadata["icons"]> = {
-  icon: [
-    { url: BRAND_ICON_LIGHT, media: "(prefers-color-scheme: light)" },
-    { url: BRAND_ICON_DARK, media: "(prefers-color-scheme: dark)" },
-  ],
+  icon: BRAND_ICON_DARK,
+  shortcut: BRAND_ICON_DARK,
   apple: BRAND_ICON_DARK,
 };
 

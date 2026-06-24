@@ -118,8 +118,8 @@
 }
 
 .marketing-landing ::selection {
-  background-color: rgba(141, 110, 158, 0.35);
-  color: #fafafa;
+  background-color: rgba(255, 106, 43, 0.25);
+  color: #f2eee3;
 }
 
 @layer base {

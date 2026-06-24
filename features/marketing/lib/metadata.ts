@@ -6,20 +6,28 @@ import { URLS } from "./releases";
 const siteUrl = getSiteUrl();
 
 export const landingMetadata: Metadata = {
-  title: "GitClaw — Self-hosted AI code reviewer for GitHub, GitLab & Bitbucket",
+  title: "GitClaw — self-hosted AI code review",
   description:
-    "GitClaw is an open-source, self-hosted AI reviewer that automatically analyzes pull requests and provides code-quality, security, performance, and maintainability feedback directly inside GitHub, GitLab, and Bitbucket. Download for Windows, Linux, and macOS.",
+    "GitClaw is an open-source, self-hosted AI code review robot and pull-request agent — a self-hosted alternative to SaaS review bots like CodeRabbit. It automatically analyzes pull requests and provides code-quality, security, performance, and maintainability feedback in GitHub, GitLab, and Bitbucket. Download for Windows, Linux, and macOS.",
   keywords: [
     "AI code review",
+    "AI code review robot",
+    "PR review bot",
+    "code review bot",
+    "AI review agent",
+    "AI coding agent",
+    "AI agent for pull requests",
     "pull request reviewer",
     "self-hosted",
-    "CodeRabbit alternative",
     "GitHub PR review",
     "GitLab MR review",
     "Bitbucket PR review",
     "code quality",
     "security review",
     "open source",
+    "CodeRabbit alternative",
+    "CodeRabbit open source alternative",
+    "self-hosted CodeRabbit alternative",
     "GitClaw",
   ],
   authors: [{ name: "GitClaw" }],
@@ -37,27 +45,27 @@ export const landingMetadata: Metadata = {
     type: "website",
     siteName: "GitClaw",
     url: siteUrl,
-    title: "GitClaw — Self-hosted AI code reviewer for pull requests",
+    title: "GitClaw | Self-hosted AI code review robot & agent",
     description:
-      "Open-source AI reviewer for GitHub, GitLab, and Bitbucket. Automatic PR analysis with feedback on code quality, security, performance, and maintainability — on your own infrastructure.",
+      "Open-source AI review robot and pull-request agent for GitHub, GitLab, and Bitbucket. Self-hosted alternative to CodeRabbit with automatic PR analysis on your own infrastructure.",
     images: [
       {
         url: brandOgImageUrl(siteUrl),
-        alt: "GitClaw logo — self-hosted AI code reviewer",
+        alt: "GitClaw — self-hosted AI code review robot and agent",
       },
     ],
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "GitClaw — Self-hosted AI code reviewer",
+    title: "GitClaw | Self-hosted AI code review robot & agent",
     description:
-      "Automatically analyze pull requests with AI. Code quality, security, performance, and maintainability feedback for GitHub, GitLab, and Bitbucket.",
+      "Open-source AI review robot and agent for pull requests. Self-hosted CodeRabbit alternative with code quality, security, performance, and maintainability feedback.",
     images: [brandOgImageUrl(siteUrl)],
   },
   icons: brandMetadataIcons,
   other: {
-    "theme-color": "#070a0f",
+    "theme-color": "#0A0A0A",
   },
 };
 
@@ -66,10 +74,12 @@ export const landingJsonLd = {
   "@type": "SoftwareApplication",
   name: "GitClaw",
   applicationCategory: "DeveloperApplication",
-  applicationSubCategory: "AI code review",
+  applicationSubCategory: "AI code review robot",
   operatingSystem: "Windows 10+, macOS, Linux",
   description:
-    "Open-source, self-hosted AI reviewer that automatically analyzes pull requests and provides code-quality, security, performance, and maintainability feedback directly inside GitHub, GitLab, and Bitbucket.",
+    "Open-source, self-hosted AI code review robot and pull-request agent — a self-hosted alternative to SaaS review bots like CodeRabbit. Automatically analyzes pull requests and provides code-quality, security, performance, and maintainability feedback directly inside GitHub, GitLab, and Bitbucket.",
+  keywords:
+    "AI code review robot, PR review bot, AI agent, CodeRabbit alternative, CodeRabbit open source alternative, self-hosted, open source, GitHub, GitLab, Bitbucket",
   url: siteUrl,
   downloadUrl: URLS.releasesLatest,
   codeRepository: URLS.repo,
@@ -81,6 +91,8 @@ export const landingJsonLd = {
     priceCurrency: "USD",
   },
   featureList: [
+    "AI pull-request agent with automatic review on open and update",
+    "Self-hosted open-source alternative to CodeRabbit",
     "Automatic pull request analysis",
     "Inline review comments on GitHub, GitLab, and Bitbucket",
     "Code quality and security feedback",

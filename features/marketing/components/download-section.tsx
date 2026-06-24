@@ -53,7 +53,7 @@ export function DownloadSection({ initialRelease }: DownloadSectionProps) {
 
       {initialRelease === null && (
         <p className="mb-4 text-center text-sm leading-relaxed text-zinc-500">
-          No release with installer files on GitHub yet — the cards below open{" "}
+          No release with installer files on GitHub yet. The cards below open{" "}
           <a
             href={URLS.releasesLatest}
             className="text-zinc-400 underline decoration-white/15 underline-offset-2 hover:text-[#b29bbd]"
