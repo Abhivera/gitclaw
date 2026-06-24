@@ -8,7 +8,6 @@ Thank you for your interest in contributing! GitClaw is an open-source AI pull r
 
 - Node.js 20.9+
 - Docker (for Postgres, or full stack)
-- A GitHub OAuth app for local sign-in (see [README.md](./README.md))
 
 ### Local setup
 
@@ -23,7 +22,7 @@ npm run db:migrate
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) and sign in via **Dashboard → Integrations**.
+Open [http://localhost:3000](http://localhost:3000) and go to **Dashboard → Integrations**.
 
 ### Verify your changes
 

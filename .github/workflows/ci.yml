@@ -14,11 +14,8 @@ jobs:
   lint-typecheck-build:
     runs-on: ubuntu-latest
     env:
-      BETTER_AUTH_SECRET: ci-placeholder-secret
-      BETTER_AUTH_URL: http://localhost:3000
+      APP_URL: http://localhost:3000
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/gitclaw
-      GITHUB_CLIENT_ID: ci-placeholder
-      GITHUB_CLIENT_SECRET: ci-placeholder
     services:
       postgres:
         image: postgres:17

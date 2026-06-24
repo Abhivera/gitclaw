@@ -28,11 +28,8 @@ jobs:
             npm_config_arch: x64
 
     env:
-      BETTER_AUTH_SECRET: desktop-release-build-placeholder
-      BETTER_AUTH_URL: http://127.0.0.1:13100
+      APP_URL: http://127.0.0.1:13100
       DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:15432/gitclaw
-      GITHUB_CLIENT_ID: desktop-release-placeholder
-      GITHUB_CLIENT_SECRET: desktop-release-placeholder
 
     steps:
       - uses: actions/checkout@v4

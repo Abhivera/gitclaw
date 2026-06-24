@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
+import { getSiteUrl } from "@/lib/site-url";
 
 export default function robots(): MetadataRoute.Robots {
-  const siteUrl = process.env.BETTER_AUTH_URL ?? "https://gitclaw.online";
+  const siteUrl = getSiteUrl();
 
   return {
     rules: {

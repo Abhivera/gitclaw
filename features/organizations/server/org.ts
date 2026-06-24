@@ -1,31 +1,12 @@
 import { prisma } from "@/lib/db";
+import { INSTANCE_USER_ID } from "@/lib/instance";
 import type { Organization } from "@/lib/generated/prisma/client";
 
-function slugify(value: string) {
-  const slug = value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "")
-    .slice(0, 48);
+const DEFAULT_ORG_SLUG = "workspace";
 
-  return slug || "workspace";
-}
-
-async function uniqueSlug(base: string) {
-  let slug = slugify(base);
-  let suffix = 0;
-
-  while (await prisma.organization.findUnique({ where: { slug } })) {
-    suffix += 1;
-    slug = `${slugify(base).slice(0, 44)}-${suffix}`;
-  }
-
-  return slug;
-}
-
-export async function getOrCreateDefaultOrg(userId: string): Promise<Organization> {
+export async function getOrCreateDefaultOrg(): Promise<Organization> {
   const membership = await prisma.organizationMember.findFirst({
-    where: { userId },
+    where: { userId: INSTANCE_USER_ID },
     include: { org: true },
     orderBy: { createdAt: "asc" },
   });
@@ -34,21 +15,13 @@ export async function getOrCreateDefaultOrg(userId: string): Promise<Organizatio
     return membership.org;
   }
 
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) {
-    throw new Error("User not found");
-  }
-
-  const baseName = user.name?.trim() || user.email.split("@")[0];
-  const slug = await uniqueSlug(baseName);
-
   return prisma.organization.create({
     data: {
-      name: `${baseName}'s workspace`,
-      slug,
+      name: "GitClaw workspace",
+      slug: DEFAULT_ORG_SLUG,
       members: {
         create: {
-          userId,
+          userId: INSTANCE_USER_ID,
           role: "owner",
         },
       },
@@ -56,8 +29,8 @@ export async function getOrCreateDefaultOrg(userId: string): Promise<Organizatio
   });
 }
 
-export async function getOrgConnectionIds(userId: string) {
-  const org = await getOrCreateDefaultOrg(userId);
+export async function getOrgConnectionIds() {
+  const org = await getOrCreateDefaultOrg();
   const connections = await prisma.providerConnection.findMany({
     where: { organizationId: org.id },
     select: { id: true },

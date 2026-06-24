@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { getServerSession } from "@/features/auth/actions";
 import { DASHBOARD_ROUTES } from "@/features/dashboard/lib/routes";
 import { LandingPage } from "@/features/marketing/components/landing-page";
 import {
@@ -7,13 +6,12 @@ import {
   landingMetadata,
 } from "@/features/marketing/lib/metadata";
 import { fetchLatestDownloads } from "@/features/marketing/lib/releases";
+import { isCoreEnvConfigured } from "@/lib/env";
 
 export const metadata = landingMetadata;
 
 export default async function Home() {
-  const session = await getServerSession();
-
-  if (session) {
+  if (isCoreEnvConfigured()) {
     redirect(DASHBOARD_ROUTES.overview);
   }
 

@@ -21,7 +21,7 @@ function getAccountLogin(
   return null;
 }
 
-export async function saveInstallation(userId: string, installationId: number) {
+export async function saveInstallation(installationId: number) {
   const app = getGithubApp();
 
   const { data } = await app.octokit.request(
@@ -32,7 +32,6 @@ export async function saveInstallation(userId: string, installationId: number) {
   const accountLogin = getAccountLogin(data.account);
 
   await saveGithubConnection(
-    userId,
     installationId,
     accountLogin,
     data.target_type ?? null

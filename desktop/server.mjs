@@ -103,7 +103,7 @@ export async function startGitClawServer() {
     ...fileEnv,
     GITCLAW_DESKTOP: "1",
     DATABASE_URL: `postgresql://postgres:postgres@127.0.0.1:${PG_PORT}/gitclaw`,
-    BETTER_AUTH_URL: `http://127.0.0.1:${NEXT_PORT}`,
+    APP_URL: `http://127.0.0.1:${NEXT_PORT}`,
     NODE_ENV: "production",
     PORT: String(NEXT_PORT),
     HOSTNAME: "127.0.0.1",

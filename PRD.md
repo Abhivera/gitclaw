@@ -52,6 +52,7 @@ Provide automated, consistent, line-level PR feedback that runs on the team's ow
 - CI/CD pipeline execution or build status checks
 - Code auto-fix / auto-commit
 - Hosted multi-tenant SaaS offering (self-host only)
+- Per-instance user authentication (current version is single local user)
 - IDE or editor plugins
 - Support for forges beyond GitHub, GitLab, and Bitbucket
 
@@ -75,7 +76,7 @@ Provide automated, consistent, line-level PR feedback that runs on the team's ow
 ### Onboarding
 
 - As a platform engineer, I can self-host GitClaw with Docker so my team does not depend on an external review SaaS.
-- As a user, I can sign in with GitHub OAuth and reach the dashboard.
+- As a user, I can open the dashboard directly with no sign-in (single local user per instance).
 - As a user, I can connect GitHub (App install), GitLab (OAuth + project webhook), or Bitbucket (OAuth + repo webhook) from **Integrations**.
 
 ### Automated review
@@ -106,15 +107,15 @@ Provide automated, consistent, line-level PR feedback that runs on the team's ow
 
 ## 6. Functional requirements
 
-### 6.1 Authentication and access
+### 6.1 Local identity (no authentication)
+
+GitClaw is designed for **single-operator, self-hosted** use. There is no sign-in, session, or external identity provider. Each instance auto-creates one local user in Postgres and uses it for all dashboard actions and provider connections.
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
-| AUTH-1 | Users sign in via GitHub OAuth (Better Auth) | P0 |
-| AUTH-2 | Unauthenticated users see the marketing landing page at `/` | P0 |
-| AUTH-3 | Authenticated users are redirected from `/` to the dashboard | P0 |
-| AUTH-4 | Dashboard routes require a valid session (`proxy.ts`) | P0 |
-| AUTH-5 | App boots gracefully when core env vars are missing (setup guidance on sign-in) | P1 |
+| LOC-1 | On first use, upsert a fixed local user (`local`) and default organization | P0 |
+| LOC-2 | When core env is configured, `/` redirects to the dashboard | P0 |
+| LOC-3 | When core env is missing, dashboard shows setup guidance | P0 |
 
 ### 6.2 Git provider integrations
 
@@ -227,9 +228,10 @@ Reviews are skipped when any of the following apply:
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
-| MKT-1 | Public landing page at `/` for unauthenticated visitors | P1 |
+| MKT-1 | Public landing page at `/` when core env is not configured | P1 |
 | MKT-2 | Product features, Docker quick start, optional desktop download cards | P1 |
 | MKT-3 | SEO metadata, Open Graph, JSON-LD, `robots.ts`, `sitemap.ts` | P2 |
+| MKT-4 | When `APP_URL` and `DATABASE_URL` are set, `/` redirects to dashboard | P1 |
 
 ---
 
@@ -245,7 +247,7 @@ flowchart TB
 
   subgraph App["GitClaw (Next.js)"]
     WH[Webhook handlers]
-    API[Auth + OAuth callbacks]
+    API[OAuth callbacks]
     DASH[Dashboard UI]
     WORK[pg-boss workers]
   end
@@ -278,7 +280,7 @@ flowchart TB
 | Layer | Technology |
 | --- | --- |
 | Framework | Next.js 16 (App Router), React 19, TypeScript |
-| Auth | Better Auth (GitHub OAuth) |
+| Identity | Single local user (no auth provider) |
 | Database | PostgreSQL, Prisma 7 |
 | Git hosts | Octokit + provider adapters |
 | AI | Vercel AI SDK |
@@ -287,7 +289,7 @@ flowchart TB
 
 ### Data model (core entities)
 
-- **User** — authenticated account
+- **User** — fixed local account (`id: local`); created automatically on first use
 - **Organization** — workspace; optional Slack webhook
 - **OrganizationMember** — user ↔ org membership with role
 - **ProviderConnection** — OAuth/App connection per org per forge
@@ -300,8 +302,8 @@ flowchart TB
 
 ### 8.1 First-time setup
 
-1. Operator clones repo, configures `.env`, runs `docker compose up --build`.
-2. User visits app URL → landing page → **Sign in to dashboard**.
+1. Operator clones repo, configures `.env` (`APP_URL`, `DATABASE_URL`, plus forge and AI keys), runs `docker compose up --build`.
+2. User visits app URL → redirected to **dashboard** (or landing page if env is incomplete).
 3. User goes to **Integrations** → connects forge(s).
 4. For GitLab/Bitbucket: copies webhook URL into project/repo settings.
 5. For GitHub: installs GitHub App on selected repositories.
@@ -345,11 +347,17 @@ flowchart TB
 - PostgreSQL (included in `docker-compose.yml`)
 - Public HTTPS URL for webhooks in production (or dev tunnel)
 
+### Core environment
+
+| Variable | Required | Description |
+| --- | --- | --- |
+| `APP_URL` | Yes | Public app URL (webhooks, OAuth redirects) |
+| `DATABASE_URL` | Yes | PostgreSQL connection string |
+
 ### External services
 
 | Service | Required for |
 | --- | --- |
-| GitHub OAuth app | User sign-in |
 | GitHub App | GitHub PR reviews |
 | GitLab OAuth app | GitLab integration (optional) |
 | Bitbucket OAuth consumer | Bitbucket integration (optional) |
@@ -357,6 +365,7 @@ flowchart TB
 
 ### Security considerations
 
+- **No built-in authentication** — operator must restrict network access (firewall, VPN, localhost) if the instance should not be public
 - Webhook signature verification on all providers
 - Tokens stored in database; refresh for OAuth providers
 - Self-hosted: operator responsible for network, secrets, and AI data handling
@@ -368,7 +377,6 @@ flowchart TB
 
 | Route | Method | Description |
 | --- | --- | --- |
-| `/api/auth/[...all]` | * | Better Auth handlers |
 | `/api/github/webhook` | POST | GitHub App webhook |
 | `/api/github/callback` | GET | GitHub App install callback |
 | `/api/gitlab/callback` | GET | GitLab OAuth callback |
@@ -386,7 +394,7 @@ Not committed; candidate roadmap items:
 - Additional forges (Azure DevOps, Gitea)
 - Review policies per branch or label
 - Custom review templates per team
-- SAML / OIDC enterprise auth
+- Optional multi-user auth (SAML / OIDC / OAuth) for shared deployments
 - Review approval gates (block merge until GitClaw passes)
 - Multi-model routing (fast model for triage, strong model for security)
 - Exportable audit reports for compliance
@@ -399,9 +407,10 @@ Not committed; candidate roadmap items:
 | # | Question | Owner |
 | --- | --- | --- |
 | 1 | Should desktop installer releases be maintained alongside the web app? | Product |
-| 2 | Default organization model: one org per user vs. explicit org creation? | Product |
+| 2 | Default organization model: one org per local user (current) vs. explicit org creation? | Product |
 | 3 | Rate limits and cost controls per org for AI API usage? | Engineering |
 | 4 | Which static-analysis tools require external binaries vs. in-process checks? | Engineering |
+| 5 | Should optional authentication be added for multi-user or internet-exposed deployments? | Product |
 
 ---
 

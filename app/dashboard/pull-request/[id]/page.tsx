@@ -1,4 +1,3 @@
-import { requireAuth } from "@/features/auth/actions";
 import { DashboardHeader } from "@/features/dashboard/components/dashboard-header";
 import { MarkdownContent } from "@/features/dashboard/components/markdown-content";
 import { PullRequestStatusSection } from "@/features/dashboard/components/pull-request-status-section";
@@ -22,9 +21,8 @@ type PageProps = {
 };
 
 const PullRequestDetailPage = async ({ params }: PageProps) => {
-  const session = await requireAuth();
   const { id } = await params;
-  const pullRequest = await getPullRequestDetail(session.user.id, id);
+  const pullRequest = await getPullRequestDetail(id);
 
   if (!pullRequest) {
     notFound();

@@ -1,4 +1,3 @@
-import { requireAuth } from "@/features/auth/actions";
 import { DashboardHeader } from "@/features/dashboard/components/dashboard-header";
 import { PrStatusBadge } from "@/features/dashboard/components/pr-status-badge";
 import { DASHBOARD_ROUTES } from "@/features/dashboard/lib/routes";
@@ -21,8 +20,7 @@ export const metadata: Metadata = {
 };
 
 const DashboardPage = async () => {
-  const session = await requireAuth();
-  const overview = await getDashboardOverview(session.user.id);
+  const overview = await getDashboardOverview();
 
   return (
     <>

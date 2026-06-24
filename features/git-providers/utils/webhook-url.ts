@@ -6,6 +6,6 @@ export function getProviderWebhookUrl(
   connectionId: string,
   baseUrl?: string
 ) {
-  const origin = baseUrl ?? env.BETTER_AUTH_URL;
+  const origin = baseUrl ?? env.APP_URL;
   return `${origin}/api/${provider}/webhook/${connectionId}`;
 }

@@ -30,7 +30,7 @@ export function QuickStartSection() {
       </div>
       <p className="text-sm leading-relaxed text-zinc-400">
         Run GitClaw on your own infrastructure with Docker, or install manually for local
-        development. Connect GitHub, GitLab, or Bitbucket from the dashboard after sign-in.
+        development. Connect GitHub, GitLab, or Bitbucket from the dashboard.
       </p>
 
       <div className="mt-5 space-y-5">

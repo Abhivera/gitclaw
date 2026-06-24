@@ -5,6 +5,7 @@ import type {
   PullRequestRecord,
 } from "../types";
 import { REVIEWABLE_GITHUB_ACTIONS, GITCLAW_MENTION } from "../constants";
+import { INSTANCE_USER_ID } from "@/lib/instance";
 import { env } from "@/lib/env";
 import type { PrFile } from "@/features/reviews/types/review";
 import {
@@ -38,7 +39,7 @@ export function getGithubApp() {
   return githubApp;
 }
 
-export function getGithubInstallUrl(userId: string) {
+export function getGithubInstallUrl() {
   const appSlug = env.GITHUB_APP_SLUG;
   if (!appSlug) {
     throw new Error(
@@ -46,7 +47,7 @@ export function getGithubInstallUrl(userId: string) {
     );
   }
   const url = new URL(`https://github.com/apps/${appSlug}/installations/new`);
-  url.searchParams.set("state", userId);
+  url.searchParams.set("state", INSTANCE_USER_ID);
   return url.toString();
 }
 

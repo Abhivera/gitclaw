@@ -1,28 +1,19 @@
-import Image from "next/image";
 import Link from "next/link";
 
-
+import { BrandLogo } from "@/components/brand-logo";
 import { DASHBOARD_ROUTES } from "@/features/dashboard/lib/routes";
 import { DashboardNav } from "@/features/dashboard/components/dashboard-nav";
-import { SidebarUserButton } from "@/features/dashboard/components/sidebar-user-button";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-  SidebarSeparator,
 } from "@/components/ui/sidebar";
-import { UserMenuUser } from "@/features/auth/components/user-menu";
 
-type DashboardSidebarProps = {
-  user: UserMenuUser;
-};
-
-export function DashboardSidebar({ user }: DashboardSidebarProps) {
+export function DashboardSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
@@ -34,17 +25,15 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
               render={
                 <Link href={DASHBOARD_ROUTES.overview}>
                   <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-none bg-sidebar">
-                    <Image
-                      src="/logo2.svg"
+                    <BrandLogo
                       alt="GitClaw logo"
-                      width={62}
-                      height={62}
+                      width={32}
+                      height={32}
                       className="object-contain"
                     />
                   </span>
                   <span className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
                     <span className="truncate font-medium">GitClaw</span>
-                   
                   </span>
                 </Link>
               }
@@ -55,10 +44,6 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
       <SidebarContent>
         <DashboardNav />
       </SidebarContent>
-      <SidebarFooter>
-        <SidebarSeparator />
-        <SidebarUserButton user={user} />
-      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   );

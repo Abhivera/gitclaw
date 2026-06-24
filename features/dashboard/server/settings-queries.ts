@@ -1,8 +1,8 @@
 import { getOrCreateDefaultOrg } from "@/features/organizations/server/org";
 import { prisma } from "@/lib/db";
 
-export async function getSettingsData(userId: string) {
-  const org = await getOrCreateDefaultOrg(userId);
+export async function getSettingsData() {
+  const org = await getOrCreateDefaultOrg();
 
   const members = await prisma.organizationMember.findMany({
     where: { orgId: org.id },
@@ -12,7 +12,6 @@ export async function getSettingsData(userId: string) {
           id: true,
           name: true,
           email: true,
-          image: true,
         },
       },
     },

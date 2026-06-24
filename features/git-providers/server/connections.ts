@@ -68,17 +68,16 @@ async function getOrgConnection(organizationId: string, provider: GitProvider) {
   return connection;
 }
 
-export async function getUserConnection(userId: string, provider: GitProvider) {
-  const org = await getOrCreateDefaultOrg(userId);
+export async function getProviderConnection(provider: GitProvider) {
+  const org = await getOrCreateDefaultOrg();
   return getOrgConnection(org.id, provider);
 }
 
 export async function getConnectionStatus(
-  userId: string,
   provider: GitProvider,
   baseUrl?: string
 ): Promise<ProviderConnectionStatus> {
-  const connection = await getUserConnection(userId, provider);
+  const connection = await getProviderConnection(provider);
 
   if (!connection) {
     return {
@@ -91,7 +90,7 @@ export async function getConnectionStatus(
     };
   }
 
-  const origin = baseUrl ?? env.BETTER_AUTH_URL;
+  const origin = baseUrl ?? env.APP_URL;
   const webhookUrl =
     provider === "github"
       ? null
@@ -108,12 +107,11 @@ export async function getConnectionStatus(
 }
 
 export async function saveGithubConnection(
-  userId: string,
   installationId: number,
   accountLogin: string | null,
   accountType: string | null
 ) {
-  const org = await getOrCreateDefaultOrg(userId);
+  const org = await getOrCreateDefaultOrg();
   const externalId = String(installationId);
 
   await prisma.providerConnection.upsert({
@@ -137,7 +135,6 @@ export async function saveGithubConnection(
 }
 
 export async function saveOAuthConnection(input: {
-  userId: string;
   provider: Extract<GitProvider, "gitlab" | "bitbucket">;
   externalId: string;
   accessToken: string;
@@ -147,7 +144,7 @@ export async function saveOAuthConnection(input: {
   accountType?: string | null;
   metadata?: Prisma.InputJsonValue;
 }) {
-  const org = await getOrCreateDefaultOrg(input.userId);
+  const org = await getOrCreateDefaultOrg();
 
   await prisma.providerConnection.upsert({
     where: {
@@ -180,11 +177,8 @@ export async function saveOAuthConnection(input: {
   });
 }
 
-export async function deleteUserConnection(
-  userId: string,
-  provider: GitProvider
-) {
-  const org = await getOrCreateDefaultOrg(userId);
+export async function deleteProviderConnection(provider: GitProvider) {
+  const org = await getOrCreateDefaultOrg();
 
   const connections = await prisma.providerConnection.findMany({
     where: { organizationId: org.id, provider },
@@ -197,8 +191,6 @@ export async function deleteUserConnection(
 
   const connectionIds = connections.map((connection) => connection.id);
 
-  // Pull requests reference connections without onDelete: Cascade, so remove
-  // them first. Repositories cascade when the connection row is deleted.
   await prisma.$transaction([
     prisma.pullRequest.deleteMany({
       where: { connectionId: { in: connectionIds } },

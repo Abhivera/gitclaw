@@ -1,4 +1,5 @@
 import { env } from "@/lib/env";
+import { INSTANCE_USER_ID } from "@/lib/instance";
 
 function getGitlabBaseUrl() {
   return (env.GITLAB_BASE_URL ?? "https://gitlab.com").replace(/\/$/, "");
@@ -17,14 +18,14 @@ function gitlabCredentials() {
   return { clientId, clientSecret };
 }
 
-export function getGitlabOAuthUrl(userId: string) {
+export function getGitlabOAuthUrl() {
   const { clientId } = gitlabCredentials();
   const params = new URLSearchParams({
     client_id: clientId,
-    redirect_uri: `${env.BETTER_AUTH_URL}/api/gitlab/callback`,
+    redirect_uri: `${env.APP_URL}/api/gitlab/callback`,
     response_type: "code",
     scope: "api read_api read_repository",
-    state: userId,
+    state: INSTANCE_USER_ID,
   });
 
   return `${getGitlabBaseUrl()}/oauth/authorize?${params.toString()}`;
@@ -73,7 +74,7 @@ export async function exchangeGitlabCode(code: string) {
       client_secret: gitlabCredentials().clientSecret,
       code,
       grant_type: "authorization_code",
-      redirect_uri: `${env.BETTER_AUTH_URL}/api/gitlab/callback`,
+      redirect_uri: `${env.APP_URL}/api/gitlab/callback`,
     }),
   });
 
@@ -107,7 +108,7 @@ export async function refreshGitlabToken(refreshToken: string) {
       client_secret: gitlabCredentials().clientSecret,
       refresh_token: refreshToken,
       grant_type: "refresh_token",
-      redirect_uri: `${env.BETTER_AUTH_URL}/api/gitlab/callback`,
+      redirect_uri: `${env.APP_URL}/api/gitlab/callback`,
     }),
   });
 

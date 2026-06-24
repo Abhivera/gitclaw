@@ -1,6 +1,5 @@
 "use server";
 
-import { getServerSession } from "@/features/auth/actions";
 import { enqueue, QUEUES } from "@/features/jobs/queue";
 import { getOrgConnectionIds } from "@/features/organizations/server/org";
 import { prisma } from "@/lib/db";
@@ -9,11 +8,6 @@ import { DASHBOARD_ROUTES } from "../lib/routes";
 import { toggleRepositoryEnabled } from "../server/queries";
 
 export async function toggleRepoEnabled(formData: FormData) {
-  const session = await getServerSession();
-  if (!session) {
-    return;
-  }
-
   const repositoryId = formData.get("repositoryId");
   const enabled = formData.get("enabled") === "true";
 
@@ -21,22 +15,18 @@ export async function toggleRepoEnabled(formData: FormData) {
     return;
   }
 
-  await toggleRepositoryEnabled(session.user.id, repositoryId, enabled);
+  await toggleRepositoryEnabled(repositoryId, enabled);
   revalidatePath(DASHBOARD_ROUTES.repos);
 }
 
 export async function rerunReview(formData: FormData) {
-  const session = await getServerSession();
-  if (!session) {
-    return;
-  }
-
   const pullRequestId = formData.get("pullRequestId");
+
   if (typeof pullRequestId !== "string") {
     return;
   }
 
-  const { connectionIds } = await getOrgConnectionIds(session.user.id);
+  const { connectionIds } = await getOrgConnectionIds();
 
   const pullRequest = await prisma.pullRequest.findFirst({
     where: {

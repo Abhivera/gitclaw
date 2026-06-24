@@ -35,9 +35,8 @@ export function getProviderSetup(provider: GitProvider): ProviderSetup {
   }
 }
 
-export function validateOAuthState(
-  state: string | null,
-  userId: string
-): boolean {
-  return Boolean(state && state === userId);
+import { INSTANCE_USER_ID } from "@/lib/instance";
+
+export function validateOAuthState(state: string | null): boolean {
+  return Boolean(state && state === INSTANCE_USER_ID);
 }

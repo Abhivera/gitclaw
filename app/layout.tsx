@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Oxanium } from "next/font/google";
+import { brandMetadataIcons } from "@/lib/brand";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/providers/theme-provider";
@@ -22,6 +23,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "GitClaw",
   description: "AI-powered pull request reviews for GitHub, GitLab, and Bitbucket",
+  icons: brandMetadataIcons,
 };
 
 export default function RootLayout({

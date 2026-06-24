@@ -1,4 +1,3 @@
-import { requireAuth } from "@/features/auth/actions";
 import { DashboardHeader } from "@/features/dashboard/components/dashboard-header";
 import { getReviewAnalytics } from "@/features/analytics/server/queries";
 import { ReviewsPerWeekChart } from "@/features/analytics/components/reviews-chart";
@@ -29,8 +28,7 @@ function formatDuration(ms: number): string {
 }
 
 const AnalyticsPage = async () => {
-  const session = await requireAuth();
-  const analytics = await getReviewAnalytics(session.user.id);
+  const analytics = await getReviewAnalytics();
 
   return (
     <>

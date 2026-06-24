@@ -9,7 +9,7 @@ export function SetupRequired() {
       <div>
         <h2 className="text-sm font-semibold text-amber-50">Configuration required</h2>
         <p className="mt-1 text-sm leading-relaxed text-amber-100/85">
-          GitClaw can show this page, but sign-in and reviews need{" "}
+          GitClaw can show this page, but reviews need{" "}
           {isDesktop ? (
             <>
               a <code className="rounded bg-black/20 px-1 py-0.5 text-xs">.env</code> file in the
@@ -49,7 +49,7 @@ export function SetupRequired() {
             <code className="text-xs">npm run dev</code>
           </>
         )}
-        . See README for Postgres, GitHub OAuth, and AI provider setup.
+        . See README for Postgres and AI provider setup.
       </p>
     </div>
   );

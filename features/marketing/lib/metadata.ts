@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { brandMetadataIcons, brandOgImageUrl } from "@/lib/brand";
+import { getSiteUrl } from "@/lib/site-url";
 import { URLS } from "./releases";
 
-const siteUrl = process.env.BETTER_AUTH_URL ?? "https://gitclaw.online";
+const siteUrl = getSiteUrl();
 
 export const landingMetadata: Metadata = {
   title: "GitClaw — Self-hosted AI code reviewer for GitHub, GitLab & Bitbucket",
@@ -40,7 +42,7 @@ export const landingMetadata: Metadata = {
       "Open-source AI reviewer for GitHub, GitLab, and Bitbucket. Automatic PR analysis with feedback on code quality, security, performance, and maintainability — on your own infrastructure.",
     images: [
       {
-        url: `${siteUrl}/logo2.svg`,
+        url: brandOgImageUrl(siteUrl),
         alt: "GitClaw logo — self-hosted AI code reviewer",
       },
     ],
@@ -51,12 +53,9 @@ export const landingMetadata: Metadata = {
     title: "GitClaw — Self-hosted AI code reviewer",
     description:
       "Automatically analyze pull requests with AI. Code quality, security, performance, and maintainability feedback for GitHub, GitLab, and Bitbucket.",
-    images: [`${siteUrl}/logo2.svg`],
+    images: [brandOgImageUrl(siteUrl)],
   },
-  icons: {
-    icon: [{ url: "/logo2.svg" }],
-    apple: "/logo2.svg",
-  },
+  icons: brandMetadataIcons,
   other: {
     "theme-color": "#070a0f",
   },

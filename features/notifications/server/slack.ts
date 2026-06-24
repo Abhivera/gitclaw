@@ -12,7 +12,7 @@ type SlackReviewNotification = {
 };
 
 function getPullRequestUrl(input: SlackReviewNotification) {
-  const origin = env.BETTER_AUTH_URL;
+  const origin = env.APP_URL;
   return `${origin}/dashboard/pull-request/${input.pullRequestId}`;
 }
 

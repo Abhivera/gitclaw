@@ -44,7 +44,6 @@ flowchart LR
 | Layer | Technology |
 | --- | --- |
 | Framework | Next.js 16 (App Router), React 19, TypeScript |
-| Auth | Better Auth (GitHub OAuth sign-in) |
 | Database | PostgreSQL, Prisma 7 |
 | Git hosts | Octokit + provider adapters |
 | AI | Vercel AI SDK (OpenRouter / Groq / OpenAI-compatible) |
@@ -54,7 +53,6 @@ flowchart LR
 ## Prerequisites
 
 - Node.js 20.9+ (manual install) or Docker
-- [GitHub OAuth App](https://github.com/settings/developers) — user sign-in
 - [GitHub App](https://github.com/settings/apps) — repo access and PR comments (required for GitHub reviews)
 - An AI backend — OpenRouter key, Groq key, or a local OpenAI-compatible server (Ollama)
 - GitLab and/or Bitbucket OAuth apps — only if using those providers
@@ -70,7 +68,7 @@ cp .env.example .env
 docker compose up --build
 ```
 
-Open [http://localhost:3000](http://localhost:3000), sign in, and go to **Dashboard → Integrations**.
+Open [http://localhost:3000](http://localhost:3000) and go to **Dashboard → Integrations**.
 
 The compose stack runs Postgres + the app. Migrations apply automatically on container start.
 
@@ -114,7 +112,7 @@ npm run dev
 
 Background workers start automatically with the Next.js server (via `instrumentation.ts`). No separate job process is required.
 
-Open [http://localhost:3000](http://localhost:3000), sign in, and go to **Dashboard → Integrations**.
+Open [http://localhost:3000](http://localhost:3000) and go to **Dashboard → Integrations**.
 
 ### 6. Connect providers
 
@@ -156,14 +154,14 @@ The landing page also lists the latest downloads when releases are available.
 
 1. Install and open GitClaw.
 2. Go to **File → Open configuration folder** and edit `.env`.
-3. Add your GitHub OAuth credentials (and AI provider keys).
-4. Restart the app, then sign in from the dashboard.
+3. Add your GitHub App and AI provider keys.
+4. Restart the app — the dashboard opens automatically.
 
-The desktop app auto-generates `BETTER_AUTH_SECRET` and wires `DATABASE_URL` to a local Postgres instance stored in your user data folder.
+The desktop app wires `DATABASE_URL` to a local Postgres instance stored in your user data folder.
 
 ### Webhooks on desktop
 
-Git providers must reach your machine for PR reviews. Use a tunnel (ngrok, cloudflared, etc.) and set `BETTER_AUTH_URL` plus `ALLOWED_DEV_ORIGINS` in the desktop `.env` to your public tunnel URL.
+Git providers must reach your machine for PR reviews. Use a tunnel (ngrok, cloudflared, etc.) and set `APP_URL` plus `ALLOWED_DEV_ORIGINS` in the desktop `.env` to your public tunnel URL.
 
 ### Build from source
 
@@ -183,16 +181,13 @@ Copy `.env.example` and set values as follows.
 
 | Variable | Required | Description |
 | --- | --- | --- |
-| `BETTER_AUTH_SECRET` | Yes | Random secret for session encryption |
-| `BETTER_AUTH_URL` | Yes | Public app URL (e.g. `http://localhost:3000`) |
+| `APP_URL` | Yes | Public app URL (e.g. `http://localhost:3000`) |
 | `DATABASE_URL` | Yes | Postgres connection string |
 
 ### GitHub
 
 | Variable | Required | Description |
 | --- | --- | --- |
-| `GITHUB_CLIENT_ID` | Yes | GitHub OAuth app — user sign-in |
-| `GITHUB_CLIENT_SECRET` | Yes | GitHub OAuth app secret |
 | `GITHUB_APP_ID` | For GitHub reviews | GitHub App ID |
 | `GITHUB_APP_PRIVATE_KEY` | For GitHub reviews | PEM private key (`\n` for newlines in `.env`) |
 | `GITHUB_WEBHOOK_SECRET` | For GitHub reviews | Webhook secret from the GitHub App |
@@ -245,7 +240,6 @@ Copy `.env.example` and set values as follows.
 ```
 app/                         # Next.js routes (pages, API handlers)
 features/
-  auth/                      # Sign-in, session, route proxy
   git-providers/             # Adapters, connections, webhooks, GitHub install
   jobs/                      # pg-boss queue + workers
   reviews/                   # AI review, chat, auto-description
@@ -256,16 +250,14 @@ features/
   organizations/             # Workspaces
   notifications/             # Slack webhooks
   ai/                        # AI provider factory
-lib/                         # Prisma client, auth, env validation
+lib/                         # Prisma client, env, instance bootstrap
 prisma/                      # Schema and migrations
-proxy.ts                     # Route protection (sign-in / dashboard)
 ```
 
 ## API routes
 
 | Route | Method | Description |
 | --- | --- | --- |
-| `/api/auth/[...all]` | * | Better Auth handlers |
 | `/api/github/webhook` | POST | GitHub App webhook |
 | `/api/github/callback` | GET | GitHub App install callback |
 | `/api/gitlab/callback` | GET | GitLab OAuth callback |

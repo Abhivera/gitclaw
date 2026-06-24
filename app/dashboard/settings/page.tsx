@@ -1,4 +1,3 @@
-import { requireAuth } from "@/features/auth/actions";
 import { getSettingsData } from "@/features/dashboard/server/settings-queries";
 import { DashboardHeader } from "@/features/dashboard/components/dashboard-header";
 import { SlackWebhookForm } from "@/features/dashboard/components/slack-webhook-form";
@@ -10,8 +9,7 @@ export const metadata: Metadata = {
 };
 
 const SettingsPage = async () => {
-  const session = await requireAuth();
-  const { organization, members } = await getSettingsData(session.user.id);
+  const { organization, members } = await getSettingsData();
 
   return (
     <>

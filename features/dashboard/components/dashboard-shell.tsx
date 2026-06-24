@@ -4,17 +4,8 @@ import {
   SidebarInset,
   SidebarProvider,
 } from "@/components/ui/sidebar";
-import { UserMenuUser } from "@/features/auth/components/user-menu";
 
-type DashboardShellProps = {
-  children: React.ReactNode;
-  user: UserMenuUser;
-};
-
-export function DashboardShell({
-  children,
-  user,
-}: DashboardShellProps) {
+export function DashboardShell({ children }: { children: React.ReactNode }) {
   return (
     <TooltipProvider>
       <SidebarProvider>
@@ -24,7 +15,7 @@ export function DashboardShell({
         >
           Skip to content
         </a>
-        <DashboardSidebar user={user} />
+        <DashboardSidebar />
         <SidebarInset id="main-content" className="min-h-svh">
           {children}
         </SidebarInset>

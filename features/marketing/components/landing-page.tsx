@@ -18,9 +18,10 @@ import {
   type ReleaseDownloads,
   URLS,
 } from "@/features/marketing/lib/releases";
+import { BRAND_ICON_DARK } from "@/lib/brand";
 
 type LandingPageProps = {
-  initialRelease?: ReleaseDownloads | null;
+  initialRelease: ReleaseDownloads | null;
 };
 
 export function LandingPage({ initialRelease }: LandingPageProps) {
@@ -40,11 +41,11 @@ export function LandingPage({ initialRelease }: LandingPageProps) {
           <div className="mb-6 flex justify-center">
             <div className="rounded-2xl bg-black/30 p-4 ring-1 ring-white/[0.08] shadow-lg shadow-black/40 sm:p-5">
               <Image
-                src="/logo2.svg"
+                src={BRAND_ICON_DARK}
                 alt="GitClaw"
-                width={260}
-                height={174}
-                className="mx-auto h-auto w-[min(100%,220px)] object-contain sm:w-[260px]"
+                width={220}
+                height={220}
+                className="mx-auto h-auto w-[min(100%,180px)] object-contain sm:w-[220px]"
                 priority
               />
             </div>
@@ -78,10 +79,10 @@ export function LandingPage({ initialRelease }: LandingPageProps) {
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm">
             <Link
-              href="/sign-in"
+              href="/dashboard"
               className="inline-flex items-center gap-1.5 rounded-full border border-[#8d6e9e]/35 bg-[#8d6e9e]/15 px-4 py-2 font-medium text-zinc-100 transition hover:border-[#8d6e9e]/55 hover:bg-[#8d6e9e]/25"
             >
-              Sign in to dashboard
+              Open dashboard
             </Link>
             <a
               href={URLS.repo}

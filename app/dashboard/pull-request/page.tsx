@@ -1,4 +1,3 @@
-import { requireAuth } from "@/features/auth/actions";
 import { DashboardHeader } from "@/features/dashboard/components/dashboard-header";
 import { EmptyState } from "@/features/dashboard/components/empty-state";
 import { Pagination } from "@/features/dashboard/components/pagination";
@@ -35,16 +34,15 @@ const PullRequestsPage = async ({
 }: {
   searchParams: SearchParams;
 }) => {
-  const session = await requireAuth();
   const params = await searchParams;
   const page = parsePageParam(params.page);
   const [pullRequestData, repos] = await Promise.all([
-    getDashboardPullRequests(session.user.id, {
+    getDashboardPullRequests({
       status: params.status,
       repo: params.repo,
       page,
     }),
-    getPullRequestRepoOptions(session.user.id),
+    getPullRequestRepoOptions(),
   ]);
 
   const { items: pullRequests, total, totalPages, page: currentPage } =

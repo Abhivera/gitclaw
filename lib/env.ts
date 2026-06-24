@@ -3,21 +3,18 @@ import { z } from "zod";
 /**
  * Centralised, validated environment configuration.
  *
- * Core variables (auth + database + GitHub OAuth) are required before the app
- * can sign users in or run workers. Optional provider and AI keys are read via
- * the `env` proxy when those code paths run.
+ * Core variables (Postgres + public app URL) are required before workers and
+ * git integrations can run. Optional provider and AI keys are read via the
+ * `env` proxy when those code paths run.
  */
 
 const optional = z.string().trim().min(1).optional();
 
 const coreEnvSchema = z.object({
-  BETTER_AUTH_SECRET: z.string().min(1),
-  BETTER_AUTH_URL: z.url(),
+  APP_URL: z.url(),
   ALLOWED_DEV_ORIGINS: optional,
   NODE_ENV: z.string().optional(),
   DATABASE_URL: z.string().min(1),
-  GITHUB_CLIENT_ID: z.string().min(1),
-  GITHUB_CLIENT_SECRET: z.string().min(1),
 });
 
 const envSchema = coreEnvSchema.extend({

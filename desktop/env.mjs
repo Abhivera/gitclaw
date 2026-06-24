@@ -1,4 +1,3 @@
-import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { app } from "electron";
@@ -6,12 +5,8 @@ import { app } from "electron";
 const ENV_TEMPLATE = `# GitClaw desktop configuration
 # Edit this file and restart the app (File → Open configuration folder).
 
-BETTER_AUTH_SECRET={secret}
-BETTER_AUTH_URL=http://127.0.0.1:{port}
+APP_URL=http://127.0.0.1:{port}
 DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:{pgPort}/gitclaw
-
-GITHUB_CLIENT_ID=
-GITHUB_CLIENT_SECRET=
 
 # Optional — GitHub App, GitLab, Bitbucket, AI keys (see README)
 GITHUB_APP_ID=
@@ -57,12 +52,10 @@ export function ensureEnvFile({ port, pgPort }) {
 
   const envPath = getEnvPath();
   const databaseUrl = `postgresql://postgres:postgres@127.0.0.1:${pgPort}/gitclaw`;
-  const authUrl = `http://127.0.0.1:${port}`;
+  const appUrl = `http://127.0.0.1:${port}`;
 
   if (!fs.existsSync(envPath)) {
-    const secret = crypto.randomBytes(32).toString("base64");
-    const content = ENV_TEMPLATE.replace("{secret}", secret)
-      .replaceAll("{port}", String(port))
+    const content = ENV_TEMPLATE.replaceAll("{port}", String(port))
       .replaceAll("{pgPort}", String(pgPort));
     fs.writeFileSync(envPath, content, "utf8");
     return envPath;
@@ -70,7 +63,7 @@ export function ensureEnvFile({ port, pgPort }) {
 
   let content = fs.readFileSync(envPath, "utf8");
   content = upsertEnvValue(content, "DATABASE_URL", databaseUrl);
-  content = upsertEnvValue(content, "BETTER_AUTH_URL", authUrl);
+  content = upsertEnvValue(content, "APP_URL", appUrl);
   fs.writeFileSync(envPath, content, "utf8");
 
   return envPath;

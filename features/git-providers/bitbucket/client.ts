@@ -1,4 +1,5 @@
 import { env } from "@/lib/env";
+import { INSTANCE_USER_ID } from "@/lib/instance";
 
 const BITBUCKET_API = "https://api.bitbucket.org/2.0";
 
@@ -13,13 +14,13 @@ function bitbucketCredentials() {
   return { clientId, clientSecret };
 }
 
-export function getBitbucketOAuthUrl(userId: string) {
+export function getBitbucketOAuthUrl() {
   const { clientId } = bitbucketCredentials();
-  const redirectUri = `${env.BETTER_AUTH_URL}/api/bitbucket/callback`;
+  const redirectUri = `${env.APP_URL}/api/bitbucket/callback`;
   const params = new URLSearchParams({
     client_id: clientId,
     response_type: "code",
-    state: userId,
+    state: INSTANCE_USER_ID,
     redirect_uri: redirectUri,
   });
 
@@ -81,7 +82,7 @@ export async function exchangeBitbucketCode(code: string) {
     body: new URLSearchParams({
       grant_type: "authorization_code",
       code,
-      redirect_uri: `${env.BETTER_AUTH_URL}/api/bitbucket/callback`,
+      redirect_uri: `${env.APP_URL}/api/bitbucket/callback`,
     }),
   });
 

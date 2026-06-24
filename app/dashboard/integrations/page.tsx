@@ -1,4 +1,3 @@
-import { requireAuth } from "@/features/auth/actions";
 import { DashboardHeader } from "@/features/dashboard/components/dashboard-header";
 import { ProviderConnectCard } from "@/features/git-providers/components/provider-connect-card";
 import {
@@ -19,13 +18,10 @@ export const metadata: Metadata = {
 };
 
 const IntegrationsPage = async () => {
-  const session = await requireAuth();
-  const userId = session.user.id;
-
   const [github, gitlab, bitbucket] = await Promise.all([
-    getConnectionStatus(userId, "github"),
-    getConnectionStatus(userId, "gitlab"),
-    getConnectionStatus(userId, "bitbucket"),
+    getConnectionStatus("github"),
+    getConnectionStatus("gitlab"),
+    getConnectionStatus("bitbucket"),
   ]);
 
   const githubSetup = getProviderSetup("github");
@@ -46,9 +42,7 @@ const IntegrationsPage = async () => {
           icon={<GithubIcon className="size-5" />}
           configured={githubSetup.configured}
           setupHint={githubSetup.setupHint}
-          installUrl={
-            githubSetup.configured ? getGithubInstallUrl(userId) : null
-          }
+          installUrl={githubSetup.configured ? getGithubInstallUrl() : null}
           connection={github}
           setupSteps={[
             "Install the app on repositories you want reviewed",
@@ -63,9 +57,7 @@ const IntegrationsPage = async () => {
           icon={<GitlabIcon className="size-5" />}
           configured={gitlabSetup.configured}
           setupHint={gitlabSetup.setupHint}
-          installUrl={
-            gitlabSetup.configured ? getGitlabOAuthUrl(userId) : null
-          }
+          installUrl={gitlabSetup.configured ? getGitlabOAuthUrl() : null}
           connection={gitlab}
           setupSteps={[
             "Authorize with your GitLab account",
@@ -80,9 +72,7 @@ const IntegrationsPage = async () => {
           icon={<BitbucketIcon className="size-5" />}
           configured={bitbucketSetup.configured}
           setupHint={bitbucketSetup.setupHint}
-          installUrl={
-            bitbucketSetup.configured ? getBitbucketOAuthUrl(userId) : null
-          }
+          installUrl={bitbucketSetup.configured ? getBitbucketOAuthUrl() : null}
           connection={bitbucket}
           setupSteps={[
             "Authorize with your Bitbucket account",

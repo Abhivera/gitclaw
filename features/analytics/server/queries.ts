@@ -51,10 +51,8 @@ function aggregateFindings(
   return { issues, suggestions, files };
 }
 
-export async function getReviewAnalytics(
-  userId: string
-): Promise<ReviewAnalytics> {
-  const { connectionIds } = await getOrgConnectionIds(userId);
+export async function getReviewAnalytics(): Promise<ReviewAnalytics> {
+  const { connectionIds } = await getOrgConnectionIds();
 
   const reviewedPrs = await prisma.pullRequest.findMany({
     where: {

@@ -10,8 +10,8 @@ import {
   getPaginationMeta,
 } from "@/features/dashboard/lib/pagination";
 
-export async function getDashboardOverview(userId: string) {
-  const { org, connectionIds } = await getOrgConnectionIds(userId);
+export async function getDashboardOverview() {
+  const { org, connectionIds } = await getOrgConnectionIds();
 
   const [reviewCount, recentPrs, connections] = await Promise.all([
     prisma.pullRequest.count({
@@ -62,11 +62,8 @@ export async function getDashboardOverview(userId: string) {
   };
 }
 
-export async function getDashboardRepositories(
-  userId: string,
-  page = 1
-) {
-  const { org, connectionIds } = await getOrgConnectionIds(userId);
+export async function getDashboardRepositories(page = 1) {
+  const { org, connectionIds } = await getOrgConnectionIds();
 
   const connections = await prisma.providerConnection.findMany({
     where: { organizationId: org.id },
@@ -109,10 +106,9 @@ export async function getDashboardRepositories(
 }
 
 export async function getDashboardPullRequests(
-  userId: string,
   filters?: { status?: string; repo?: string; page?: number }
 ) {
-  const { connectionIds } = await getOrgConnectionIds(userId);
+  const { connectionIds } = await getOrgConnectionIds();
   const where = {
     connectionId: { in: connectionIds },
     ...(filters?.status ? { status: filters.status } : {}),
@@ -155,8 +151,8 @@ export async function getDashboardPullRequests(
   };
 }
 
-export async function getPullRequestRepoOptions(userId: string) {
-  const { connectionIds } = await getOrgConnectionIds(userId);
+export async function getPullRequestRepoOptions() {
+  const { connectionIds } = await getOrgConnectionIds();
 
   const repos = await prisma.pullRequest.findMany({
     where: { connectionId: { in: connectionIds } },
@@ -168,11 +164,8 @@ export async function getPullRequestRepoOptions(userId: string) {
   return repos.map((repo) => repo.repoFullName);
 }
 
-export async function getPullRequestStatus(
-  userId: string,
-  pullRequestId: string
-) {
-  const { connectionIds } = await getOrgConnectionIds(userId);
+export async function getPullRequestStatus(pullRequestId: string) {
+  const { connectionIds } = await getOrgConnectionIds();
 
   return prisma.pullRequest.findFirst({
     where: {
@@ -187,8 +180,8 @@ export async function getPullRequestStatus(
   });
 }
 
-export async function getPullRequestDetail(userId: string, pullRequestId: string) {
-  const { connectionIds } = await getOrgConnectionIds(userId);
+export async function getPullRequestDetail(pullRequestId: string) {
+  const { connectionIds } = await getOrgConnectionIds();
 
   return prisma.pullRequest.findFirst({
     where: {
@@ -209,11 +202,10 @@ export async function getPullRequestDetail(userId: string, pullRequestId: string
 }
 
 export async function toggleRepositoryEnabled(
-  userId: string,
   repositoryId: string,
   enabled: boolean
 ) {
-  const { connectionIds } = await getOrgConnectionIds(userId);
+  const { connectionIds } = await getOrgConnectionIds();
 
   const repo = await prisma.repository.findFirst({
     where: {
