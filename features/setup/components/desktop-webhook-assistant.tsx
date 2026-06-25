@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { DASHBOARD_ROUTES } from "@/features/dashboard/lib/routes";
