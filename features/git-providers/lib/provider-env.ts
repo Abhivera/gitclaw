@@ -25,6 +25,7 @@ export function isGitProviderConfigured(): boolean {
 export function isAiProviderConfigured(): boolean {
   return Boolean(
     getEnvValue("OPENROUTER_API_KEY") ||
+      getEnvValue("ANTHROPIC_API_KEY") ||
       getEnvValue("GROQ_API_KEY") ||
       getEnvValue("OPENAI_BASE_URL"),
   );

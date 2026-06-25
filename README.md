@@ -10,7 +10,7 @@ Open-source AI pull request reviewer for **GitHub**, **GitLab**, and **Bitbucket
 - **Multi-provider** — GitHub App, GitLab OAuth, and Bitbucket OAuth
 - **Automatic reviews** — Webhooks on PR open/update; incremental diffs via `lastReviewedSha`
 - **Structured AI output** — Vercel AI SDK with Zod-validated findings
-- **Pluggable AI** — OpenRouter, Groq, or any OpenAI-compatible API (OpenAI, Ollama, LM Studio, …)
+- **Pluggable AI** — OpenRouter, Anthropic (Claude), Groq, or any OpenAI-compatible API (OpenAI, Ollama, LM Studio, …)
 - **Inline + summary comments** — Posted directly on the pull request
 - **Review gating** — Skips drafts, bot authors, duplicate SHAs, and `[skip review]` titles
 - **`.gitclaw.yaml`** — Per-repo ignore paths, tone, instructions, and static-analysis toggles
@@ -46,7 +46,7 @@ flowchart LR
 | Framework | Next.js 16 (App Router), React 19, TypeScript |
 | Database | PostgreSQL, Prisma 7 |
 | Git hosts | Octokit + provider adapters |
-| AI | Vercel AI SDK (OpenRouter / Groq / OpenAI-compatible) |
+| AI | Vercel AI SDK (OpenRouter / Anthropic / Groq / OpenAI-compatible) |
 | Jobs | pg-boss (Postgres-backed) |
 | UI | Tailwind CSS v4, shadcn/ui |
 
@@ -54,7 +54,7 @@ flowchart LR
 
 - Node.js 20.9+ (manual install) or Docker
 - [GitHub App](https://github.com/settings/apps) — repo access and PR comments (required for GitHub reviews)
-- An AI backend — OpenRouter key, Groq key, or a local OpenAI-compatible server (Ollama)
+- An AI backend — OpenRouter key, Anthropic key, Groq key, or a local OpenAI-compatible server (Ollama)
 - GitLab and/or Bitbucket OAuth apps — only if using those providers
 - A **public webhook URL** for production (or a tunnel like ngrok / cloudflared for local dev)
 
@@ -206,12 +206,13 @@ Copy `.env.example` and set values as follows.
 
 | Variable | Required | Description |
 | --- | --- | --- |
-| `AI_PROVIDER` | No | `openrouter` \| `groq` \| `openai-compatible` \| `ollama` (auto-detects if unset) |
+| `AI_PROVIDER` | No | `openrouter` \| `anthropic` \| `groq` \| `openai-compatible` \| `ollama` (auto-detects if unset) |
 | `OPENROUTER_API_KEY` | OpenRouter | API key ([openrouter.ai](https://openrouter.ai/)) |
+| `ANTHROPIC_API_KEY` | Anthropic | API key ([console.anthropic.com](https://console.anthropic.com/)) |
 | `GROQ_API_KEY` | Groq | API key ([console.groq.com](https://console.groq.com/)) |
 | `OPENAI_BASE_URL` | OpenAI-compatible | e.g. `http://localhost:11434/v1` for Ollama |
 | `OPENAI_API_KEY` | Optional | API key for OpenAI-compatible endpoints that require one |
-| `GITCLAW_REVIEW_MODEL` | No | Model id (defaults: `openrouter/free`, `llama-3.3-70b-versatile`, `gpt-4o-mini`) |
+| `GITCLAW_REVIEW_MODEL` | No | Model id (defaults: `openrouter/free`, `claude-sonnet-4-6`, `llama-3.3-70b-versatile`, `gpt-4o-mini`) |
 
 ### Development
 

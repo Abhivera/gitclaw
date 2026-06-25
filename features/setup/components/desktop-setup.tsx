@@ -115,12 +115,15 @@ export function DesktopSetup({ status }: DesktopSetupProps) {
           <SetupStep
             complete={status.ai.complete}
             title="1. AI provider"
-            description="Choose OpenRouter, Groq, or a local OpenAI-compatible endpoint (Ollama). Add the matching API key or base URL to your configuration file."
+            description="Choose OpenRouter, Anthropic (Claude), Groq, or a local OpenAI-compatible endpoint (Ollama). Add the matching API key or base URL to your configuration file."
             showActions
           >
             <ul className="list-inside list-disc space-y-1 text-xs text-muted-foreground">
               <li>
                 OpenRouter — set <code className="text-foreground">OPENROUTER_API_KEY</code>
+              </li>
+              <li>
+                Anthropic — set <code className="text-foreground">ANTHROPIC_API_KEY</code>
               </li>
               <li>
                 Groq — set <code className="text-foreground">GROQ_API_KEY</code>

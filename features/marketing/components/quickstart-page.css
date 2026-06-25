@@ -1,0 +1,222 @@
+.marketing-landing .guide-hero {
+  padding: 72px 0 48px;
+  text-align: center;
+}
+
+.marketing-landing .guide-hero h1 {
+  font-size: 36px;
+  margin-bottom: 14px;
+}
+
+.marketing-landing .guide-toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  justify-content: center;
+  margin-top: 28px;
+  font-size: 13px;
+}
+
+.marketing-landing .guide-toc a {
+  color: var(--text-dim);
+  border-bottom: 1px dotted var(--text-faint);
+}
+
+.marketing-landing .guide-toc a:hover {
+  color: var(--amber);
+  border-color: var(--amber-dim);
+}
+
+.marketing-landing .guide-section {
+  padding: 56px 0;
+}
+
+.marketing-landing .guide-section .section-desc {
+  margin-bottom: 32px;
+}
+
+.marketing-landing .guide-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.marketing-landing .guide-step {
+  border: 1px solid var(--line-soft);
+  border-radius: 6px;
+  background: var(--bg-raised);
+  padding: 22px 24px;
+}
+
+.marketing-landing .guide-step-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.marketing-landing .guide-step-num {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background: var(--amber-glow);
+  border: 1px solid var(--amber-dim);
+  color: var(--amber);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.marketing-landing .guide-step h3 {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.4;
+  padding-top: 3px;
+}
+
+.marketing-landing .guide-step p,
+.marketing-landing .guide-step li {
+  font-size: 13.5px;
+  color: var(--text-dim);
+  line-height: 1.65;
+}
+
+.marketing-landing .guide-step p {
+  margin-bottom: 12px;
+}
+
+.marketing-landing .guide-step p:last-child {
+  margin-bottom: 0;
+}
+
+.marketing-landing .guide-step ul,
+.marketing-landing .guide-step ol {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.marketing-landing .guide-step li + li {
+  margin-top: 6px;
+}
+
+.marketing-landing .guide-step code {
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line-soft);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 12.5px;
+}
+
+.marketing-landing .guide-step a {
+  color: var(--text);
+  border-bottom: 1px solid var(--text-faint);
+}
+
+.marketing-landing .guide-step a:hover {
+  color: var(--amber);
+  border-color: var(--amber-dim);
+}
+
+.marketing-landing .qs-code {
+  margin-top: 12px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  overflow: hidden;
+  background: #0e0e0e;
+}
+
+.marketing-landing .qs-code-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line-soft);
+  background: var(--bg);
+}
+
+.marketing-landing .qs-code-label {
+  font-size: 11px;
+  color: var(--text-faint);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.marketing-landing .qs-code-body {
+  margin: 0;
+  padding: 14px 16px;
+  overflow-x: auto;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--text-dim);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.marketing-landing .env-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-top: 12px;
+}
+
+.marketing-landing .env-table th,
+.marketing-landing .env-table td {
+  border: 1px solid var(--line-soft);
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.marketing-landing .env-table th {
+  background: var(--bg);
+  color: var(--text-faint);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.marketing-landing .env-table td {
+  color: var(--text-dim);
+}
+
+.marketing-landing .env-table code {
+  color: var(--amber);
+  font-weight: 500;
+}
+
+.marketing-landing .path-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.marketing-landing .path-tab {
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 3px;
+  border: 1px solid var(--line);
+  color: var(--text-dim);
+}
+
+.marketing-landing .path-tab:hover {
+  border-color: var(--text-faint);
+  color: var(--text);
+}
+
+@media (max-width: 680px) {
+  .marketing-landing .guide-hero h1 {
+    font-size: 28px;
+  }
+
+  .marketing-landing .env-table {
+    display: block;
+    overflow-x: auto;
+  }
+}

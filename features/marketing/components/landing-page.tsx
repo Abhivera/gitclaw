@@ -66,7 +66,7 @@ const FEATURES = [
     title: "Bring your own model",
     body: (
       <>
-        Pluggable AI backend — OpenRouter, Groq, or any OpenAI-compatible endpoint, including a local{" "}
+        Pluggable AI backend — OpenRouter, Anthropic (Claude), Groq, or any OpenAI-compatible endpoint, including a local{" "}
         <code>Ollama</code> instance.
       </>
     ),
@@ -104,6 +104,8 @@ export function LandingPage() {
             <span className="sep">/</span>
             <a href="#self-host">Self-hosting</a>
             <span className="sep">/</span>
+            <a href={URLS.quickstart}>Quickstart</a>
+            <span className="sep">/</span>
             <a href={URLS.repo} target="_blank" rel="noreferrer">
               Source
             </a>
@@ -131,11 +133,8 @@ export function LandingPage() {
           </p>
 
           <div className="cta-row">
-            <a href={URLS.quickstart} className="btn btn-primary" target="_blank" rel="noreferrer">
+            <a href={URLS.quickstart} className="btn btn-primary">
               Quickstart
-            </a>
-            <a href={URLS.docs} className="btn btn-ghost" target="_blank" rel="noreferrer">
-              Read docs <span className="arrow">↗</span>
             </a>
           </div>
           <div className="meta-line">
@@ -243,11 +242,8 @@ export function LandingPage() {
             Five-minute setup, MIT licensed, no usage limits because there&apos;s no meter to hit.
           </p>
           <div className="cta-row">
-            <a href={URLS.quickstart} className="btn btn-primary" target="_blank" rel="noreferrer">
+            <a href={URLS.quickstart} className="btn btn-primary">
               Quickstart
-            </a>
-            <a href={URLS.docs} className="btn btn-ghost" target="_blank" rel="noreferrer">
-              Read docs <span className="arrow">↗</span>
             </a>
             <a href={URLS.repo} className="btn btn-ghost" target="_blank" rel="noreferrer">
               Open source on GitHub <span className="arrow">↗</span>

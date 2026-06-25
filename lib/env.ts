@@ -20,6 +20,7 @@ const userConfigurableEnvSchema = z.object({
   BITBUCKET_CLIENT_SECRET: optional,
   AI_PROVIDER: optional,
   OPENROUTER_API_KEY: optional,
+  ANTHROPIC_API_KEY: optional,
   GROQ_API_KEY: optional,
   OPENAI_BASE_URL: optional,
   OPENAI_API_KEY: optional,
@@ -45,6 +46,7 @@ export const DESKTOP_USER_ENV_KEYS = [
   "BITBUCKET_CLIENT_SECRET",
   "AI_PROVIDER",
   "OPENROUTER_API_KEY",
+  "ANTHROPIC_API_KEY",
   "GROQ_API_KEY",
   "OPENAI_BASE_URL",
   "OPENAI_API_KEY",
@@ -58,6 +60,7 @@ export const DESKTOP_SECRET_ENV_KEYS = new Set<string>([
   "GITLAB_CLIENT_SECRET",
   "BITBUCKET_CLIENT_SECRET",
   "OPENROUTER_API_KEY",
+  "ANTHROPIC_API_KEY",
   "GROQ_API_KEY",
   "OPENAI_API_KEY",
 ]);

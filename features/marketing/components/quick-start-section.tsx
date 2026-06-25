@@ -63,14 +63,9 @@ export function QuickStartSection() {
       </div>
 
       <p className="mt-4 text-xs text-zinc-600">
-        Full setup guide in the{" "}
-        <a
-          href={URLS.repo}
-          className="text-[#8d6e9e] hover:underline"
-          target="_blank"
-          rel="noreferrer"
-        >
-          open-source repository
+        Full step-by-step guide on the{" "}
+        <a href={URLS.quickstart} className="text-[#8d6e9e] hover:underline">
+          Quickstart page
         </a>
         .
       </p>

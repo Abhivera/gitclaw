@@ -1,12 +1,14 @@
+import { createAnthropic } from "@ai-sdk/anthropic";
 import type { LanguageModel } from "ai";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { env } from "@/lib/env";
 
 /**
- * GitClaw supports three AI backends (set `AI_PROVIDER` or let it auto-detect):
+ * GitClaw supports four AI backends (set `AI_PROVIDER` or let it auto-detect):
  *
  * - **openrouter** — many models via one key (default)
+ * - **anthropic** — Claude models via Anthropic API
  * - **groq** — fast inference via Groq's OpenAI-compatible API
  * - **openai-compatible** — OpenAI, Azure, Ollama, LM Studio, vLLM, etc.
  *
@@ -17,6 +19,7 @@ const GROQ_BASE_URL = "https://api.groq.com/openai/v1";
 
 const DEFAULT_MODELS = {
   openrouter: "openrouter/free",
+  anthropic: "claude-sonnet-4-6",
   groq: "llama-3.3-70b-versatile",
   "openai-compatible": "gpt-4o-mini",
 } as const;
@@ -26,6 +29,7 @@ type AIProvider = keyof typeof DEFAULT_MODELS;
 function resolveProvider(): AIProvider {
   const explicit = env.AI_PROVIDER?.toLowerCase();
   if (explicit === "groq") return "groq";
+  if (explicit === "anthropic" || explicit === "claude") return "anthropic";
   if (
     explicit === "openai" ||
     explicit === "openai-compatible" ||
@@ -36,8 +40,21 @@ function resolveProvider(): AIProvider {
   if (explicit === "openrouter") return "openrouter";
 
   // Auto-detect when AI_PROVIDER is unset.
-  if (env.GROQ_API_KEY && !env.OPENROUTER_API_KEY && !env.OPENAI_BASE_URL) {
+  if (
+    env.GROQ_API_KEY &&
+    !env.OPENROUTER_API_KEY &&
+    !env.ANTHROPIC_API_KEY &&
+    !env.OPENAI_BASE_URL
+  ) {
     return "groq";
+  }
+  if (
+    env.ANTHROPIC_API_KEY &&
+    !env.OPENROUTER_API_KEY &&
+    !env.GROQ_API_KEY &&
+    !env.OPENAI_BASE_URL
+  ) {
+    return "anthropic";
   }
   if (env.OPENAI_BASE_URL) {
     return "openai-compatible";
@@ -76,6 +93,19 @@ export function getReviewModel(): LanguageModel {
         apiKey: env.GROQ_API_KEY,
       });
       cachedModel = groq(modelId);
+      return cachedModel;
+    }
+
+    case "anthropic": {
+      if (!env.ANTHROPIC_API_KEY) {
+        throw new Error(
+          "ANTHROPIC_API_KEY is required when AI_PROVIDER=anthropic (or when Anthropic is auto-detected)."
+        );
+      }
+      const anthropic = createAnthropic({
+        apiKey: env.ANTHROPIC_API_KEY,
+      });
+      cachedModel = anthropic(modelId);
       return cachedModel;
     }
 

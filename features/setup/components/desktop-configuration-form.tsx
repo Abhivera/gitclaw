@@ -94,6 +94,7 @@ const CONFIG_FIELD_GROUPS: FieldGroupConfig[] = [
     description: "Choose one provider and add the matching credentials.",
     fields: [
       { key: "OPENROUTER_API_KEY", label: "OpenRouter API key", type: "password" },
+      { key: "ANTHROPIC_API_KEY", label: "Anthropic API key", type: "password" },
       { key: "GROQ_API_KEY", label: "Groq API key", type: "password" },
       {
         key: "OPENAI_BASE_URL",
@@ -133,6 +134,7 @@ const ADVANCED_FIELDS: FieldConfig[] = [
 const AI_PROVIDER_OPTIONS = [
   { value: "", label: "Auto-detect" },
   { value: "openrouter", label: "OpenRouter" },
+  { value: "anthropic", label: "Anthropic (Claude)" },
   { value: "groq", label: "Groq" },
   { value: "openai-compatible", label: "OpenAI-compatible" },
   { value: "ollama", label: "Ollama" },
