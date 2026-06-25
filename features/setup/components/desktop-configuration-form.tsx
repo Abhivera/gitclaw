@@ -144,6 +144,14 @@ function emptyFormState(): Record<string, string> {
   return Object.fromEntries(DESKTOP_USER_ENV_KEYS.map((key) => [key, ""]));
 }
 
+async function fetchDesktopConfig(): Promise<ConfigSnapshot> {
+  const response = await fetch("/api/desktop/config");
+  if (!response.ok) {
+    throw new Error("Could not load configuration.");
+  }
+  return (await response.json()) as ConfigSnapshot;
+}
+
 function ConfigField({
   field,
   value,
@@ -236,30 +244,52 @@ export function DesktopConfigurationForm() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
+  const applyConfig = useCallback((data: ConfigSnapshot) => {
+    setValues({ ...emptyFormState(), ...data.values });
+    setSecretsSet(data.secretsSet);
+  }, []);
+
   const loadConfig = useCallback(async () => {
     setLoading(true);
     setLoadError(null);
 
     try {
-      const response = await fetch("/api/desktop/config");
-      if (!response.ok) {
-        throw new Error("Could not load configuration.");
-      }
-
-      const data = (await response.json()) as ConfigSnapshot;
-      setValues({ ...emptyFormState(), ...data.values });
-      setSecretsSet(data.secretsSet);
+      const data = await fetchDesktopConfig();
+      applyConfig(data);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not load configuration.";
       setLoadError(message);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [applyConfig]);
 
   useEffect(() => {
-    void loadConfig();
-  }, [loadConfig]);
+    let cancelled = false;
+
+    fetchDesktopConfig()
+      .then((data) => {
+        if (!cancelled) {
+          applyConfig(data);
+        }
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          const message =
+            error instanceof Error ? error.message : "Could not load configuration.";
+          setLoadError(message);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [applyConfig]);
 
   const handleChange = (key: string, value: string) => {
     setValues((current) => ({ ...current, [key]: value }));
