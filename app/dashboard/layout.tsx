@@ -1,5 +1,5 @@
 import { ensureInstance } from "@/lib/instance";
-import { DashboardShell } from "@/features/dashboard/components/dashboard-shell";
+import { DashboardLayoutClient } from "@/features/dashboard/components/dashboard-layout-client";
 import { SetupRequired } from "@/features/setup/components/setup-required";
 import { isCoreEnvConfigured } from "@/lib/env";
 
@@ -22,5 +22,5 @@ export default async function DashboardLayout({
 
   await ensureInstance();
 
-  return <DashboardShell>{children}</DashboardShell>;
+  return <DashboardLayoutClient>{children}</DashboardLayoutClient>;
 }

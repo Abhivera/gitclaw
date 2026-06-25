@@ -7,6 +7,8 @@ import {
   statusButtonClass,
 } from "@/features/dashboard/lib/status-style";
 import { disconnectProvider } from "@/features/git-providers/actions";
+import { DesktopConfigActions } from "@/features/setup/components/desktop-config-actions";
+import { WebhookUrlRow } from "@/features/setup/components/webhook-url-row";
 import type { GitProvider } from "@/lib/generated/prisma/client";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -29,6 +31,8 @@ type ProviderConnectCardProps = {
   setupHint?: string;
   connection: ProviderConnectionStatus;
   setupSteps?: string[];
+  isDesktop?: boolean;
+  publicWebhookUrl?: string | null;
 };
 
 function PlugsIcon({ className }: { className?: string }) {
@@ -50,9 +54,11 @@ function ArrowSquareOutIcon({ className }: { className?: string }) {
 function WebhookSetup({
   webhookUrl,
   webhookSecret,
+  description,
 }: {
   webhookUrl: string | null;
   webhookSecret: string | null;
+  description?: string;
 }) {
   if (!webhookUrl) {
     return null;
@@ -62,18 +68,10 @@ function WebhookSetup({
     <div className="space-y-2 rounded-none border border-border bg-muted/40 p-3 text-xs">
       <p className="font-medium text-foreground">Webhook setup</p>
       <p className="text-muted-foreground">
-        Add a project or repository webhook pointing to this URL. Enable merge
-        request / pull request events.
+        {description ??
+          "Add a project or repository webhook pointing to this URL. Enable merge request / pull request events."}
       </p>
-      <div className="space-y-1">
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-muted-foreground">Webhook URL</p>
-          <CopyButton value={webhookUrl} label="Copy URL" />
-        </div>
-        <code className="block break-all rounded-none bg-background px-2 py-1 text-[11px]">
-          {webhookUrl}
-        </code>
-      </div>
+      <WebhookUrlRow label="Webhook URL" url={webhookUrl} />
       {webhookSecret ? (
         <div className="space-y-1">
           <div className="flex items-center justify-between gap-2">
@@ -99,6 +97,8 @@ export function ProviderConnectCard({
   setupHint,
   connection,
   setupSteps = [],
+  isDesktop = false,
+  publicWebhookUrl = null,
 }: ProviderConnectCardProps) {
   const { connected, accountLogin, webhookUrl, webhookSecret } = connection;
 
@@ -141,7 +141,10 @@ export function ProviderConnectCard({
       </CardHeader>
       <CardContent className="space-y-4">
         {!configured ? (
-          <p className="text-xs text-muted-foreground">{setupHint}</p>
+          <div className="space-y-3">
+            <p className="text-xs text-muted-foreground">{setupHint}</p>
+            {isDesktop ? <DesktopConfigActions compact /> : null}
+          </div>
         ) : connected ? (
           <p className="text-xs text-muted-foreground">
             Connected as{" "}
@@ -157,6 +160,13 @@ export function ProviderConnectCard({
             ))}
           </ul>
         )}
+        {publicWebhookUrl ? (
+          <WebhookSetup
+            webhookUrl={publicWebhookUrl}
+            webhookSecret={null}
+            description="Set this URL in your GitHub App webhook settings (Pull request and Issue comment events)."
+          />
+        ) : null}
         <WebhookSetup
           webhookUrl={connected ? webhookUrl : null}
           webhookSecret={connected ? webhookSecret : null}

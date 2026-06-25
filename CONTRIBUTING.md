@@ -16,7 +16,6 @@ git clone https://github.com/Abhivera/gitclaw.git
 cd gitclaw
 npm install
 cp .env.example .env
-# Fill in .env — see README for required variables
 docker compose up -d postgres
 npm run db:migrate
 npm run dev

@@ -1,14 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import { app } from "electron";
+import { parseEnvFile, upsertEnvValue } from "./env-file.mjs";
 
-const ENV_TEMPLATE = `# GitClaw desktop configuration
-# Edit this file and restart the app (File → Open configuration folder).
-
-APP_URL=http://127.0.0.1:{port}
+const ENV_TEMPLATE = `APP_URL=http://127.0.0.1:{port}
 DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:{pgPort}/gitclaw
 
-# Optional — GitHub App, GitLab, Bitbucket, AI keys (see README)
 GITHUB_APP_ID=
 GITHUB_APP_PRIVATE_KEY=
 GITHUB_WEBHOOK_SECRET=
@@ -35,17 +32,6 @@ export function getEnvPath() {
   return path.join(getConfigDir(), ".env");
 }
 
-function upsertEnvValue(content, key, value) {
-  const line = `${key}=${value}`;
-  const pattern = new RegExp(`^${key}=.*$`, "m");
-
-  if (pattern.test(content)) {
-    return content.replace(pattern, line);
-  }
-
-  return `${content.trimEnd()}\n${line}\n`;
-}
-
 export function ensureEnvFile({ port, pgPort }) {
   const configDir = getConfigDir();
   fs.mkdirSync(configDir, { recursive: true });
@@ -70,32 +56,5 @@ export function ensureEnvFile({ port, pgPort }) {
 }
 
 export function loadEnvFile(envPath) {
-  const content = fs.readFileSync(envPath, "utf8");
-  const env = {};
-
-  for (const line of content.split("\n")) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) {
-      continue;
-    }
-
-    const separator = trimmed.indexOf("=");
-    if (separator === -1) {
-      continue;
-    }
-
-    const key = trimmed.slice(0, separator).trim();
-    let value = trimmed.slice(separator + 1).trim();
-
-    if (
-      (value.startsWith('"') && value.endsWith('"')) ||
-      (value.startsWith("'") && value.endsWith("'"))
-    ) {
-      value = value.slice(1, -1);
-    }
-
-    env[key] = value;
-  }
-
-  return env;
+  return parseEnvFile(fs.readFileSync(envPath, "utf8"));
 }

@@ -4,14 +4,17 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { app } from "electron";
 import { ensureEnvFile, getEnvPath, loadEnvFile } from "./env.mjs";
-
-const NEXT_PORT = 13100;
+export const NEXT_PORT = 13100;
 const PG_PORT = 15432;
 
 /** @type {import('embedded-postgres').default | null} */
 let postgres = null;
 /** @type {import('node:child_process').ChildProcess | null} */
 let nextProcess = null;
+/** @type {import('node:fs').FSWatcher | null} */
+let envWatcher = null;
+/** @type {NodeJS.Timeout | null} */
+let envReloadTimer = null;
 
 export function getStandaloneDir() {
   if (app.isPackaged) {
@@ -71,6 +74,116 @@ async function runMigrations(standaloneDir, runtimeEnv) {
   });
 }
 
+function buildRuntimeEnv(fileEnv) {
+  return {
+    ...process.env,
+    ...fileEnv,
+    GITCLAW_DESKTOP: "1",
+    GITCLAW_CONFIG_PATH: getEnvPath(),
+    DATABASE_URL: `postgresql://postgres:postgres@127.0.0.1:${PG_PORT}/gitclaw`,
+    APP_URL: `http://127.0.0.1:${NEXT_PORT}`,
+    NODE_ENV: "production",
+    PORT: String(NEXT_PORT),
+    HOSTNAME: "127.0.0.1",
+  };
+}
+
+function attachNextProcessLogging(child) {
+  child.stdout?.on("data", (chunk) => {
+    console.log(`[gitclaw] ${chunk.toString().trimEnd()}`);
+  });
+
+  child.stderr?.on("data", (chunk) => {
+    console.error(`[gitclaw] ${chunk.toString().trimEnd()}`);
+  });
+
+  child.on("exit", (code, signal) => {
+    if (code !== null && code !== 0) {
+      console.error(`[gitclaw] server exited (code=${code}, signal=${signal})`);
+    }
+  });
+}
+
+async function spawnNextServer(standaloneDir, runtimeEnv) {
+  const serverJs = path.join(standaloneDir, "server.js");
+
+  nextProcess = spawn(process.execPath, [serverJs], {
+    cwd: standaloneDir,
+    env: runtimeEnv,
+    stdio: "pipe",
+  });
+
+  attachNextProcessLogging(nextProcess);
+  await waitForServer(NEXT_PORT);
+}
+
+async function stopNextServer() {
+  const child = nextProcess;
+  if (!child) {
+    return;
+  }
+
+  nextProcess = null;
+
+  await new Promise((resolve) => {
+    const timeout = setTimeout(() => {
+      child.kill("SIGKILL");
+      resolve(undefined);
+    }, 5_000);
+
+    child.once("exit", () => {
+      clearTimeout(timeout);
+      resolve(undefined);
+    });
+
+    child.kill("SIGTERM");
+  });
+}
+
+export async function restartNextServer() {
+  const standaloneDir = getStandaloneDir();
+  const serverJs = path.join(standaloneDir, "server.js");
+
+  if (!requireExists(serverJs)) {
+    throw new Error("Desktop server bundle is missing.");
+  }
+
+  ensureEnvFile({ port: NEXT_PORT, pgPort: PG_PORT });
+  const fileEnv = loadEnvFile(getEnvPath());
+  const runtimeEnv = buildRuntimeEnv(fileEnv);
+
+  await stopNextServer();
+  await spawnNextServer(standaloneDir, runtimeEnv);
+
+  return { port: NEXT_PORT, pgPort: PG_PORT };
+}
+
+export function watchEnvFile(onReload) {
+  stopEnvWatcher();
+
+  const envPath = getEnvPath();
+  envWatcher = fs.watch(envPath, () => {
+    if (envReloadTimer) {
+      clearTimeout(envReloadTimer);
+    }
+
+    envReloadTimer = setTimeout(() => {
+      envReloadTimer = null;
+      onReload();
+    }, 500);
+  });
+}
+
+export function stopEnvWatcher() {
+  if (envReloadTimer) {
+    clearTimeout(envReloadTimer);
+    envReloadTimer = null;
+  }
+
+  envWatcher?.close();
+  envWatcher = null;
+}
+
 export async function startGitClawServer() {
   const standaloneDir = getStandaloneDir();
   const serverJs = path.join(standaloneDir, "server.js");
@@ -98,49 +211,16 @@ export async function startGitClawServer() {
   await postgres.initialise();
   await postgres.start();
 
-  const runtimeEnv = {
-    ...process.env,
-    ...fileEnv,
-    GITCLAW_DESKTOP: "1",
-    DATABASE_URL: `postgresql://postgres:postgres@127.0.0.1:${PG_PORT}/gitclaw`,
-    APP_URL: `http://127.0.0.1:${NEXT_PORT}`,
-    NODE_ENV: "production",
-    PORT: String(NEXT_PORT),
-    HOSTNAME: "127.0.0.1",
-  };
-
+  const runtimeEnv = buildRuntimeEnv(fileEnv);
   await runMigrations(standaloneDir, runtimeEnv);
-
-  nextProcess = spawn(process.execPath, [serverJs], {
-    cwd: standaloneDir,
-    env: runtimeEnv,
-    stdio: "pipe",
-  });
-
-  nextProcess.stdout?.on("data", (chunk) => {
-    console.log(`[gitclaw] ${chunk.toString().trimEnd()}`);
-  });
-
-  nextProcess.stderr?.on("data", (chunk) => {
-    console.error(`[gitclaw] ${chunk.toString().trimEnd()}`);
-  });
-
-  nextProcess.on("exit", (code, signal) => {
-    if (code !== null && code !== 0) {
-      console.error(`[gitclaw] server exited (code=${code}, signal=${signal})`);
-    }
-  });
-
-  await waitForServer(NEXT_PORT);
+  await spawnNextServer(standaloneDir, runtimeEnv);
 
   return { port: NEXT_PORT, pgPort: PG_PORT };
 }
 
 export async function stopGitClawServer() {
-  if (nextProcess) {
-    nextProcess.kill("SIGTERM");
-    nextProcess = null;
-  }
+  stopEnvWatcher();
+  await stopNextServer();
 
   if (postgres) {
     await postgres.stop();

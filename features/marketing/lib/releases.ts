@@ -1,9 +1,10 @@
-/** Canonical public repository (open source). */
 export const REPO = "Abhivera/gitclaw" as const;
 
 export const URLS = {
   releasesLatest: `https://github.com/${REPO}/releases/latest`,
   repo: `https://github.com/${REPO}`,
+  docs: `https://github.com/${REPO}#readme`,
+  quickstart: `https://github.com/${REPO}#quick-start-docker`,
   apiLatest: `https://api.github.com/repos/${REPO}/releases/latest`,
   rawMain: `https://raw.githubusercontent.com/${REPO}/main`,
 } as const;

@@ -29,6 +29,11 @@
       "preload.mjs",
       "server.mjs",
       "env.mjs",
+      "env-file.mjs",
+      "first-run.mjs",
+      "paths.mjs",
+      "routes.mjs",
+      "splash.html",
       "package.json"
     ],
     "extraResources": [
@@ -36,6 +41,10 @@
         "from": "../.next/standalone",
         "to": "standalone",
         "filter": ["**/*"]
+      },
+      {
+        "from": "../public/favicon.ico",
+        "to": "tray-icon.ico"
       }
     ],
     "asar": true,

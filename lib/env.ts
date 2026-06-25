@@ -1,23 +1,14 @@
 import { z } from "zod";
 
-/**
- * Centralised, validated environment configuration.
- *
- * Core variables (Postgres + public app URL) are required before workers and
- * git integrations can run. Optional provider and AI keys are read via the
- * `env` proxy when those code paths run.
- */
-
 const optional = z.string().trim().min(1).optional();
 
 const coreEnvSchema = z.object({
   APP_URL: z.url(),
-  ALLOWED_DEV_ORIGINS: optional,
   NODE_ENV: z.string().optional(),
   DATABASE_URL: z.string().min(1),
 });
 
-const envSchema = coreEnvSchema.extend({
+const userConfigurableEnvSchema = z.object({
   GITHUB_APP_ID: optional,
   GITHUB_APP_PRIVATE_KEY: optional,
   GITHUB_WEBHOOK_SECRET: optional,
@@ -33,10 +24,55 @@ const envSchema = coreEnvSchema.extend({
   OPENAI_BASE_URL: optional,
   OPENAI_API_KEY: optional,
   GITCLAW_REVIEW_MODEL: optional,
+  ALLOWED_DEV_ORIGINS: optional,
 });
+
+const envSchema = coreEnvSchema.extend(userConfigurableEnvSchema.shape);
 
 export type CoreEnv = z.infer<typeof coreEnvSchema>;
 export type Env = z.infer<typeof envSchema>;
+export type UserConfigurableEnv = z.infer<typeof userConfigurableEnvSchema>;
+
+export const DESKTOP_USER_ENV_KEYS = [
+  "GITHUB_APP_ID",
+  "GITHUB_APP_PRIVATE_KEY",
+  "GITHUB_WEBHOOK_SECRET",
+  "GITHUB_APP_SLUG",
+  "GITLAB_CLIENT_ID",
+  "GITLAB_CLIENT_SECRET",
+  "GITLAB_BASE_URL",
+  "BITBUCKET_CLIENT_ID",
+  "BITBUCKET_CLIENT_SECRET",
+  "AI_PROVIDER",
+  "OPENROUTER_API_KEY",
+  "GROQ_API_KEY",
+  "OPENAI_BASE_URL",
+  "OPENAI_API_KEY",
+  "GITCLAW_REVIEW_MODEL",
+  "ALLOWED_DEV_ORIGINS",
+] as const satisfies ReadonlyArray<keyof UserConfigurableEnv>;
+
+export const DESKTOP_SECRET_ENV_KEYS = new Set<string>([
+  "GITHUB_APP_PRIVATE_KEY",
+  "GITHUB_WEBHOOK_SECRET",
+  "GITLAB_CLIENT_SECRET",
+  "BITBUCKET_CLIENT_SECRET",
+  "OPENROUTER_API_KEY",
+  "GROQ_API_KEY",
+  "OPENAI_API_KEY",
+]);
+
+export function validateMergedEnv(
+  values: Record<string, string | undefined>,
+):
+  | { success: true; data: Env }
+  | { success: false; issues: z.core.$ZodIssue[] } {
+  const result = envSchema.safeParse(values);
+  if (result.success) {
+    return { success: true, data: result.data };
+  }
+  return { success: false, issues: result.error.issues };
+}
 
 export class ConfigError extends Error {
   readonly issues: z.core.$ZodIssue[];
@@ -57,7 +93,7 @@ function formatIssues(issues: z.core.$ZodIssue[]): string {
     "Invalid environment configuration:",
     ...lines,
     "",
-    "Copy .env.example to .env and fill in the missing values.",
+    "See README and .env.example.",
   ].join("\n");
 }
 

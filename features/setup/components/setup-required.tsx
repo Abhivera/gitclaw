@@ -1,4 +1,5 @@
 import { getEnvIssues } from "@/lib/env";
+import { DesktopConfigActions } from "@/features/setup/components/desktop-config-actions";
 
 export function SetupRequired() {
   const issues = getEnvIssues();
@@ -12,8 +13,9 @@ export function SetupRequired() {
           GitClaw can show this page, but reviews need{" "}
           {isDesktop ? (
             <>
-              a <code className="rounded bg-black/20 px-1 py-0.5 text-xs">.env</code> file in the
-              desktop configuration folder (File → Open configuration folder).
+              a <code className="rounded bg-black/20 px-1 py-0.5 text-xs">.env</code> file in your
+              desktop configuration folder. Use Settings → Configuration or open the folder from the
+              setup screen.
             </>
           ) : (
             <>
@@ -27,6 +29,11 @@ export function SetupRequired() {
           cp .env.example .env
         </div>
       )}
+      {isDesktop ? (
+        <div className="rounded-lg bg-black/20 px-3 py-3">
+          <DesktopConfigActions compact />
+        </div>
+      ) : null}
       <ul className="space-y-1.5 text-sm text-amber-100/90">
         {issues.map((issue) => {
           const key = issue.path.join(".") || "(root)";
@@ -40,10 +47,10 @@ export function SetupRequired() {
           );
         })}
       </ul>
-      <p className="text-xs leading-relaxed text-amber-100/70">
+        <p className="text-xs leading-relaxed text-amber-100/70">
         After updating <code className="text-xs">.env</code>, restart{" "}
         {isDesktop ? (
-          <>the GitClaw desktop app</>
+          <>GitClaw (Settings → Restart GitClaw)</>
         ) : (
           <>
             <code className="text-xs">npm run dev</code>

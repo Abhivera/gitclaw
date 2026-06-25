@@ -5,7 +5,6 @@ import { REPO, URLS } from "@/features/marketing/lib/releases";
 const DOCKER_QUICK_START = `git clone https://github.com/${REPO}.git
 cd gitclaw
 cp .env.example .env
-# Fill in .env — see README for required variables
 docker compose up --build`;
 
 const MANUAL_QUICK_START = `git clone https://github.com/${REPO}.git

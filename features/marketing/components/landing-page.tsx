@@ -1,9 +1,7 @@
 import { JetBrains_Mono } from "next/font/google";
 import Image from "next/image";
-import Link from "next/link";
-import { DASHBOARD_ROUTES } from "@/features/dashboard/lib/routes";
 import { URLS } from "@/features/marketing/lib/releases";
-import { BRAND_ICON_DARK } from "@/lib/brand";
+import { BRAND_ICON_DARK, BRAND_ICON_MARK } from "@/lib/brand";
 import "./landing-page.css";
 
 const jetbrainsMono = JetBrains_Mono({
@@ -75,6 +73,19 @@ const FEATURES = [
   },
 ] as const;
 
+function LogoMark({ className, width, height }: { className: string; width: number; height: number }) {
+  return (
+    <Image
+      src={BRAND_ICON_MARK}
+      alt=""
+      width={width}
+      height={height}
+      className={className}
+      aria-hidden
+    />
+  );
+}
+
 export function LandingPage() {
   return (
     <div className={`marketing-landing ${jetbrainsMono.variable}`}>
@@ -102,6 +113,7 @@ export function LandingPage() {
 
       <div className="wrap">
         <div className="hero">
+          <LogoMark className="hero-mark" width={52} height={52} />
           <div className="prompt-line">
             $ gitclaw review --pr 482<span className="blink" aria-hidden />
           </div>
@@ -119,11 +131,11 @@ export function LandingPage() {
           </p>
 
           <div className="cta-row">
-            <Link href={DASHBOARD_ROUTES.overview} className="btn btn-primary">
-              Open dashboard
-            </Link>
-            <a href={URLS.repo} className="btn btn-ghost" target="_blank" rel="noreferrer">
-              View source <span className="arrow">↗</span>
+            <a href={URLS.quickstart} className="btn btn-primary" target="_blank" rel="noreferrer">
+              Quickstart
+            </a>
+            <a href={URLS.docs} className="btn btn-ghost" target="_blank" rel="noreferrer">
+              Read docs <span className="arrow">↗</span>
             </a>
           </div>
           <div className="meta-line">
@@ -222,6 +234,7 @@ export function LandingPage() {
         <hr className="rule" />
 
         <div className="closing">
+          <LogoMark className="closing-mark" width={26} height={26} />
           <div className="eyebrow" style={{ justifyContent: "center" }}>
             GET STARTED
           </div>
@@ -230,9 +243,12 @@ export function LandingPage() {
             Five-minute setup, MIT licensed, no usage limits because there&apos;s no meter to hit.
           </p>
           <div className="cta-row">
-            <Link href={DASHBOARD_ROUTES.overview} className="btn btn-primary">
-              Open dashboard
-            </Link>
+            <a href={URLS.quickstart} className="btn btn-primary" target="_blank" rel="noreferrer">
+              Quickstart
+            </a>
+            <a href={URLS.docs} className="btn btn-ghost" target="_blank" rel="noreferrer">
+              Read docs <span className="arrow">↗</span>
+            </a>
             <a href={URLS.repo} className="btn btn-ghost" target="_blank" rel="noreferrer">
               Open source on GitHub <span className="arrow">↗</span>
             </a>
@@ -242,7 +258,10 @@ export function LandingPage() {
 
       <footer className="landing-footer">
         <div className="wrap">
-          <span>GitClaw — MIT licensed</span>
+          <span className="footer-brand">
+            <LogoMark className="footer-mark" width={16} height={16} />
+            GitClaw — MIT licensed
+          </span>
           <span>
             <a href={URLS.repo} target="_blank" rel="noreferrer">
               {URLS.repo.replace("https://github.com/", "")}

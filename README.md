@@ -64,7 +64,6 @@ flowchart LR
 git clone https://github.com/Abhivera/gitclaw.git
 cd gitclaw
 cp .env.example .env
-# Fill in .env (see Environment variables below)
 docker compose up --build
 ```
 

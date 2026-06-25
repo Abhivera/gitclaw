@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GitClaw</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        align-items: center;
+        background: #0a0a0a;
+        color: #f2eee3;
+        display: flex;
+        font-family:
+          "Segoe UI",
+          system-ui,
+          -apple-system,
+          sans-serif;
+        height: 100vh;
+        justify-content: center;
+        overflow: hidden;
+        user-select: none;
+      }
+
+      .panel {
+        text-align: center;
+        width: 100%;
+      }
+
+      .mark {
+        color: #ff6a2b;
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: -0.04em;
+        margin-bottom: 1rem;
+      }
+
+      .title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+
+      .status {
+        color: #8a8579;
+        font-size: 0.875rem;
+      }
+
+      .dots::after {
+        animation: dots 1.4s steps(4, end) infinite;
+        content: "";
+      }
+
+      @keyframes dots {
+        0% {
+          content: "";
+        }
+        25% {
+          content: ".";
+        }
+        50% {
+          content: "..";
+        }
+        75% {
+          content: "...";
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="panel">
+      <div class="mark">gitclaw.</div>
+      <p class="title">Starting GitClaw</p>
+      <p class="status">Preparing database<span class="dots"></span></p>
+    </div>
+  </body>
+</html>

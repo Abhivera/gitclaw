@@ -1,20 +1,7 @@
 import type { NextConfig } from "next";
+import { parseAllowedDevOriginsList } from "./lib/env-helpers";
 
-function parseAllowedDevOrigins(): string[] | undefined {
-  const raw = process.env.ALLOWED_DEV_ORIGINS;
-  if (!raw) {
-    return undefined;
-  }
-
-  const origins = raw
-    .split(",")
-    .map((origin) => origin.trim())
-    .filter(Boolean);
-
-  return origins.length > 0 ? origins : undefined;
-}
-
-const allowedDevOrigins = parseAllowedDevOrigins();
+const allowedDevOrigins = parseAllowedDevOriginsList(process.env.ALLOWED_DEV_ORIGINS);
 const isDesktopBuild = process.env.DESKTOP_BUILD === "1";
 
 const nextConfig: NextConfig = {
@@ -32,7 +19,7 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  ...(allowedDevOrigins ? { allowedDevOrigins } : {}),
+  ...(allowedDevOrigins.length > 0 ? { allowedDevOrigins } : {}),
   experimental: {
     // Faster dev restarts — https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopackFileSystemCacheForDev
     turbopackFileSystemCacheForDev: true,

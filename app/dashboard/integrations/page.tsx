@@ -11,6 +11,9 @@ import { getGithubInstallUrl } from "@/features/git-providers/github/adapter";
 import { getGitlabOAuthUrl } from "@/features/git-providers/gitlab/client";
 import { getBitbucketOAuthUrl } from "@/features/git-providers/bitbucket/client";
 import { getProviderSetup } from "@/features/git-providers/lib/provider-config";
+import { DesktopWebhooksBanner } from "@/features/setup/components/desktop-webhooks-banner";
+import { isDesktopApp } from "@/features/setup/lib/desktop-setup";
+import { getDesktopTunnelStatus, getDesktopWebhookBaseUrl } from "@/features/setup/lib/desktop-tunnel";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -18,15 +21,19 @@ export const metadata: Metadata = {
 };
 
 const IntegrationsPage = async () => {
+  const isDesktop = isDesktopApp();
+  const webhookBaseUrl = isDesktop ? getDesktopWebhookBaseUrl() : undefined;
+
   const [github, gitlab, bitbucket] = await Promise.all([
-    getConnectionStatus("github"),
-    getConnectionStatus("gitlab"),
-    getConnectionStatus("bitbucket"),
+    getConnectionStatus("github", webhookBaseUrl),
+    getConnectionStatus("gitlab", webhookBaseUrl),
+    getConnectionStatus("bitbucket", webhookBaseUrl),
   ]);
 
   const githubSetup = getProviderSetup("github");
   const gitlabSetup = getProviderSetup("gitlab");
   const bitbucketSetup = getProviderSetup("bitbucket");
+  const tunnelStatus = isDesktop ? getDesktopTunnelStatus() : null;
 
   return (
     <>
@@ -35,6 +42,7 @@ const IntegrationsPage = async () => {
         description="Connect GitHub, GitLab, or Bitbucket to receive automated pull request reviews."
       />
       <div className="flex flex-1 flex-col gap-6 p-6">
+        <DesktopWebhooksBanner />
         <ProviderConnectCard
           provider="github"
           label={GIT_PROVIDER_LABELS.github}
@@ -44,6 +52,10 @@ const IntegrationsPage = async () => {
           setupHint={githubSetup.setupHint}
           installUrl={githubSetup.configured ? getGithubInstallUrl() : null}
           connection={github}
+          isDesktop={isDesktop}
+          publicWebhookUrl={
+            tunnelStatus?.tunnelConfigured ? tunnelStatus.githubWebhookUrl : null
+          }
           setupSteps={[
             "Install the app on repositories you want reviewed",
             "App-level webhooks are configured automatically",
@@ -59,6 +71,7 @@ const IntegrationsPage = async () => {
           setupHint={gitlabSetup.setupHint}
           installUrl={gitlabSetup.configured ? getGitlabOAuthUrl() : null}
           connection={gitlab}
+          isDesktop={isDesktop}
           setupSteps={[
             "Authorize with your GitLab account",
             "Copy the webhook URL and secret into your project settings",
@@ -74,6 +87,7 @@ const IntegrationsPage = async () => {
           setupHint={bitbucketSetup.setupHint}
           installUrl={bitbucketSetup.configured ? getBitbucketOAuthUrl() : null}
           connection={bitbucket}
+          isDesktop={isDesktop}
           setupSteps={[
             "Authorize with your Bitbucket account",
             "Add a repository webhook with the URL and secret shown after connecting",

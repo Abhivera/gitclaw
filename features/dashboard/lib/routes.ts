@@ -1,10 +1,12 @@
 export const DASHBOARD_ROUTES = {
   overview: "/dashboard",
+  setup: "/dashboard/setup",
   repos: "/dashboard/repos",
   pullRequest: "/dashboard/pull-request",
   analytics: "/dashboard/analytics",
   integrations: "/dashboard/integrations",
   settings: "/dashboard/settings",
+  configuration: "/dashboard/settings/configuration",
 } as const;
 
 export type DashboardRoute =

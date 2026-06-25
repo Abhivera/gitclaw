@@ -91,6 +91,41 @@
   color: var(--amber);
 }
 
+.marketing-landing .hero-mark {
+  width: 64px;
+  height: auto;
+  display: block;
+  margin: 0 auto 28px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  padding: 6px;
+  background: var(--bg-raised);
+}
+
+.marketing-landing .closing-mark {
+  width: 34px;
+  height: auto;
+  display: block;
+  margin: 0 auto 16px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  padding: 4px;
+  background: var(--bg-raised);
+}
+
+.marketing-landing .footer-mark {
+  width: 16px;
+  height: auto;
+  display: block;
+  opacity: 0.85;
+}
+
+.marketing-landing .footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .marketing-landing .topnav {
   display: flex;
   gap: 28px;
