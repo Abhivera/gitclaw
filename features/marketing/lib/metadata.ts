@@ -6,7 +6,7 @@ import { URLS } from "./releases";
 const siteUrl = getSiteUrl();
 
 export const landingMetadata: Metadata = {
-  title: "GitClaw — self-hosted AI code review",
+  title: "GitClaw | self-hosted AI code review",
   description:
     "GitClaw is an open-source, self-hosted AI code review robot and pull-request agent — a self-hosted alternative to SaaS review bots like CodeRabbit. It automatically analyzes pull requests and provides code-quality, security, performance, and maintainability feedback in GitHub, GitLab, and Bitbucket. Download for Windows, Linux, and macOS.",
   keywords: [
@@ -51,7 +51,7 @@ export const landingMetadata: Metadata = {
     images: [
       {
         url: brandOgImageUrl(siteUrl),
-        alt: "GitClaw — self-hosted AI code review robot and agent",
+        alt: "GitClaw",
       },
     ],
     locale: "en_US",
