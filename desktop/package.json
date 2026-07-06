@@ -1,8 +1,14 @@
 {
   "name": "gitclaw-desktop",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "GitClaw desktop app — self-hosted AI PR reviewer",
+  "author": "GitClaw contributors",
+  "homepage": "https://github.com/Abhivera/gitclaw",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Abhivera/gitclaw.git"
+  },
   "main": "main.mjs",
   "type": "module",
   "scripts": {

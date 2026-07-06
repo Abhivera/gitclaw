@@ -54,13 +54,7 @@ function pickLinux(assets: GitHubAsset[]): {
   return { appImage, deb };
 }
 
-export async function fetchLatestDownloads(): Promise<ReleaseDownloads | null> {
-  const res = await fetch(URLS.apiLatest, {
-    headers: { Accept: "application/vnd.github+json" },
-    next: { revalidate: 300 },
-  });
-  if (!res.ok) return null;
-  const data = (await res.json()) as GitHubRelease;
+function parseReleaseDownloads(data: GitHubRelease): ReleaseDownloads | null {
   const assets = data.assets ?? [];
   if (assets.length === 0) return null;
 
@@ -78,6 +72,24 @@ export async function fetchLatestDownloads(): Promise<ReleaseDownloads | null> {
       : undefined,
     linuxDeb: deb ? { name: deb.name, url: deb.browser_download_url } : undefined,
   };
+}
+
+export async function fetchLatestDownloads(): Promise<ReleaseDownloads | null> {
+  const res = await fetch(`https://api.github.com/repos/${REPO}/releases?per_page=20`, {
+    headers: { Accept: "application/vnd.github+json" },
+    next: { revalidate: 300 },
+  });
+  if (!res.ok) return null;
+
+  const releases = (await res.json()) as GitHubRelease[];
+  for (const release of releases) {
+    const downloads = parseReleaseDownloads(release);
+    if (downloads) {
+      return downloads;
+    }
+  }
+
+  return null;
 }
 
 export function detectPlatform(): PlatformKey {

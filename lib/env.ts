@@ -1,6 +1,10 @@
 import { z } from "zod";
 
-const optional = z.string().trim().min(1).optional();
+/** Treat blank .env values as unset (desktop template ships empty keys). */
+const optional = z.preprocess(
+  (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+  z.string().trim().min(1).optional(),
+);
 
 const coreEnvSchema = z.object({
   APP_URL: z.url(),

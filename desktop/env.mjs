@@ -3,7 +3,8 @@ import path from "node:path";
 import { app } from "electron";
 import { parseEnvFile, upsertEnvValue } from "./env-file.mjs";
 
-const ENV_TEMPLATE = `APP_URL=http://127.0.0.1:{port}
+const ENV_TEMPLATE = `# GitClaw desktop configuration (ports are managed automatically)
+APP_URL=http://127.0.0.1:{port}
 DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:{pgPort}/gitclaw
 
 GITHUB_APP_ID=
@@ -22,6 +23,7 @@ GROQ_API_KEY=
 OPENAI_BASE_URL=
 OPENAI_API_KEY=
 GITCLAW_REVIEW_MODEL=
+# Tunnel hostname for webhooks (e.g. abc.trycloudflare.com)
 ALLOWED_DEV_ORIGINS=
 `;
 

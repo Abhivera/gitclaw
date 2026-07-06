@@ -20,7 +20,8 @@ export async function register() {
       await startWorkers();
     } catch (error) {
       console.error("[gitclaw] failed to start background workers", error);
-      if (process.env.NODE_ENV === "production") {
+      // Desktop must keep the UI up even when workers fail (e.g. first launch).
+      if (process.env.NODE_ENV === "production" && process.env.GITCLAW_DESKTOP !== "1") {
         throw error;
       }
     }
