@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { QuickstartPage } from "@/features/marketing/components/quickstart-page";
+import { fetchLatestDownloads } from "@/features/marketing/lib/downloads.server";
 import { getSiteUrl } from "@/lib/site-url";
 
 const siteUrl = getSiteUrl();
@@ -19,6 +20,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function QuickstartRoute() {
-  return <QuickstartPage />;
+export default async function QuickstartRoute() {
+  const initialRelease = await fetchLatestDownloads();
+
+  return <QuickstartPage initialRelease={initialRelease} />;
 }

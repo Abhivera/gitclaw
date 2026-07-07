@@ -18,11 +18,17 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "clean": "node -e \"const fs=require('fs');['.next'].forEach(p=>fs.rmSync(p,{recursive:true,force:true}));try{fs.rmSync('tsconfig.tsbuildinfo')}catch{}\"",
-    "desktop:build:next": "cross-env DESKTOP_BUILD=1 APP_URL=http://127.0.0.1:13100 DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:15432/gitclaw npm run build && node desktop/scripts/prepare-standalone.mjs",
+    "desktop:build:next": "npm run desktop:icons && cross-env DESKTOP_BUILD=1 APP_URL=http://127.0.0.1:13100 DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:15432/gitclaw npm run build && node desktop/scripts/prepare-standalone.mjs",
     "desktop:install": "npm install --prefix desktop",
+    "desktop:icons": "node desktop/scripts/prepare-icons.mjs",
     "desktop:dev": "npm run desktop:build:next && npm run desktop:install && npm run start --prefix desktop",
     "desktop:dist": "npm run desktop:build:next && npm run desktop:install && npm run dist --prefix desktop",
-    "desktop:dist:dir": "npm run desktop:build:next && npm run desktop:install && npm run dist:dir --prefix desktop"
+    "desktop:dist:win": "npm run desktop:build:next && npm run desktop:install && npm run dist:win --prefix desktop",
+    "desktop:dist:mac": "npm run desktop:build:next && npm run desktop:install && npm run dist:mac --prefix desktop",
+    "desktop:dist:linux": "npm run desktop:build:next && npm run desktop:install && npm run dist:linux --prefix desktop",
+    "desktop:dist:dir": "npm run desktop:build:next && npm run desktop:install && npm run dist:dir --prefix desktop",
+    "desktop:prepare-downloads": "node desktop/scripts/prepare-website-downloads.mjs",
+    "desktop:publish-downloads": "npm run desktop:dist && npm run desktop:prepare-downloads"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.86",
@@ -62,6 +68,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "prisma": "^7.8.0",
+    "sharp": "^0.34.5",
     "shadcn": "^4.11.0",
     "tailwindcss": "^4",
     "typescript": "^5"

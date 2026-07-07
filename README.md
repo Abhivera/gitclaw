@@ -1,9 +1,27 @@
-# GitClaw
+<p align="center">
+  <img src="public/white-icon-without-bg.png" alt="GitClaw logo" width="128" />
+</p>
 
-[![CI](https://github.com/Abhivera/gitclaw/actions/workflows/ci.yml/badge.svg)](https://github.com/Abhivera/gitclaw/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+<h1 align="center">GitClaw</h1>
 
-Open-source AI pull request reviewer for **GitHub**, **GitLab**, and **Bitbucket**. Connect a provider from the dashboard and every opened or updated PR gets an automated review — summary plus inline comments covering correctness, security, performance, and maintainability. Free to self-host.
+<p align="center">
+  Open-source, self-hosted AI pull request reviewer for <b>GitHub</b>, <b>GitLab</b>, and <b>Bitbucket</b>.
+  <br />
+  Connect a provider from the dashboard and every opened or updated PR gets an automated review — summary plus inline comments covering correctness, security, performance, and maintainability.
+</p>
+
+<p align="center">
+  <a href="https://gitclaw.online"><b>Website</b></a> ·
+  <a href="https://gitclaw.online/quickstart">Quickstart</a> ·
+  <a href="https://gitclaw.online/download/windows">Download</a> ·
+  <a href="https://github.com/Abhivera/gitclaw/releases">Releases</a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/Abhivera/gitclaw/actions/workflows/ci.yml"><img src="https://github.com/Abhivera/gitclaw/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="https://github.com/Abhivera/gitclaw/actions/workflows/release-desktop.yml"><img src="https://github.com/Abhivera/gitclaw/actions/workflows/release-desktop.yml/badge.svg" alt="Release Desktop" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT" /></a>
+</p>
 
 ## Features
 
@@ -17,6 +35,7 @@ Open-source AI pull request reviewer for **GitHub**, **GitLab**, and **Bitbucket
 - **PR chat** — Reply to `@gitclaw` mentions in comments
 - **Auto description** — Generates a PR body when empty on open
 - **Dashboard** — Overview, repos, PR list/detail, analytics, integrations, settings
+- **Desktop app** — Native Windows, macOS, and Linux builds with embedded PostgreSQL
 - **Teams** — Organizations, per-repo enable/disable, Slack notifications on review complete
 - **Background jobs** — Postgres-backed queue (pg-boss); no extra orchestrator required
 
@@ -48,6 +67,7 @@ flowchart LR
 | Git hosts | Octokit + provider adapters |
 | AI | Vercel AI SDK (OpenRouter / Anthropic / Groq / OpenAI-compatible) |
 | Jobs | pg-boss (Postgres-backed) |
+| Desktop | Electron, embedded Postgres |
 | UI | Tailwind CSS v4, shadcn/ui |
 
 ## Prerequisites
@@ -139,15 +159,16 @@ GitClaw ships as a native desktop app with an embedded PostgreSQL database — n
 
 ### Download installers
 
-Pre-built installers are published on [GitHub Releases](https://github.com/Abhivera/gitclaw/releases/latest):
+Installers are hosted on **[gitclaw.online](https://gitclaw.online)** and mirrored on [GitHub Releases](https://github.com/Abhivera/gitclaw/releases/latest).
 
-| Platform | Format |
-| --- | --- |
-| Windows | `.exe` (NSIS installer) |
-| macOS | `.dmg` (Intel + Apple Silicon) |
-| Linux | `.AppImage` or `.deb` |
+| Platform | Format | Download |
+| --- | --- | --- |
+| Windows | `.exe` (NSIS installer) | [gitclaw.online/download/windows](https://gitclaw.online/download/windows) |
+| macOS | `.dmg` (Intel + Apple Silicon) | [gitclaw.online/download/macos](https://gitclaw.online/download/macos) |
+| Linux | `.AppImage` | [gitclaw.online/download/linux](https://gitclaw.online/download/linux) |
+| Linux | `.deb` (Debian / Ubuntu) | [gitclaw.online/download/deb](https://gitclaw.online/download/deb) |
 
-The landing page also lists the latest downloads when releases are available.
+Direct file URLs follow `https://gitclaw.online/downloads/<filename>` once published.
 
 ### First launch
 
@@ -162,15 +183,36 @@ The desktop app wires `DATABASE_URL` to a local Postgres instance stored in your
 
 Git providers must reach your machine for PR reviews. Use a tunnel (ngrok, cloudflared, etc.) and set `APP_URL` plus `ALLOWED_DEV_ORIGINS` in the desktop `.env` to your public tunnel URL.
 
-### Build from source
+### Build installers from source
+
+Build on the target OS (or use the [desktop release workflow](.github/workflows/release-desktop.yml) for all platforms):
 
 ```bash
 npm install
-npm run desktop:dist        # installers in release/desktop/
-npm run desktop:dev         # run unpackaged for development
+npm run desktop:dist          # installers for the current OS → release/desktop/
+npm run desktop:dist:win      # Windows only
+npm run desktop:dist:mac      # macOS only
+npm run desktop:dist:linux    # Linux only
+npm run desktop:dev           # run unpackaged for development
 ```
 
-Tag a release (`git tag v0.1.0 && git push origin v0.1.0`) to trigger the [desktop release workflow](.github/workflows/release-desktop.yml) on GitHub Actions.
+Publish installers to the website (`public/downloads/`):
+
+```bash
+npm run desktop:publish-downloads   # build + copy to public/downloads/
+# or, if installers are already in release/desktop/:
+npm run desktop:prepare-downloads
+```
+
+Deploy the site with the `public/downloads/` folder included (Docker copies `public/` automatically). Large binaries are gitignored — upload them to your server or let CI attach them to GitHub Releases.
+
+Tag a release to build all platforms in CI:
+
+```bash
+git tag v0.1.1 && git push origin v0.1.1
+```
+
+You can also run **Actions → Release Desktop → Run workflow** to test builds without tagging.
 
 ## Environment variables
 
@@ -219,6 +261,7 @@ Copy `.env.example` and set values as follows.
 | Variable | Required | Description |
 | --- | --- | --- |
 | `ALLOWED_DEV_ORIGINS` | No | Comma-separated tunnel hostnames for local webhook testing |
+| `DOWNLOAD_BASE_URL` | No | Base URL for desktop installer files (default: `{APP_URL}/downloads`) |
 
 ## Scripts
 
@@ -233,12 +276,18 @@ Copy `.env.example` and set values as follows.
 | `npm run db:migrate` | Create and apply migrations |
 | `npm run db:studio` | Open Prisma Studio |
 | `npm run desktop:dev` | Build and run the desktop app (dev) |
-| `npm run desktop:dist` | Package installers for Windows, macOS, and Linux |
+| `npm run desktop:dist` | Package installers for the current OS |
+| `npm run desktop:dist:win` | Package Windows installer (`.exe`) |
+| `npm run desktop:dist:mac` | Package macOS disk images (`.dmg`) |
+| `npm run desktop:dist:linux` | Package Linux AppImage and `.deb` |
+| `npm run desktop:prepare-downloads` | Copy installers to `public/downloads/` for the website |
+| `npm run desktop:publish-downloads` | Build installers and prepare website downloads |
 
 ## Project structure
 
 ```
 app/                         # Next.js routes (pages, API handlers)
+desktop/                     # Electron app (main process, packaging)
 features/
   git-providers/             # Adapters, connections, webhooks, GitHub install
   jobs/                      # pg-boss queue + workers
@@ -246,12 +295,14 @@ features/
   static-analysis/           # Pattern-based diff checks
   config/                    # .gitclaw.yaml parse and apply
   dashboard/                 # Shell, nav, queries
+  marketing/                 # Landing page, quickstart, download pages
   analytics/                 # Dashboard charts
   organizations/             # Workspaces
   notifications/             # Slack webhooks
   ai/                        # AI provider factory
 lib/                         # Prisma client, env, instance bootstrap
 prisma/                      # Schema and migrations
+public/downloads/            # Website-hosted desktop installers + manifest
 ```
 
 ## API routes
@@ -264,6 +315,7 @@ prisma/                      # Schema and migrations
 | `/api/gitlab/webhook/[connectionId]` | POST | GitLab project webhook |
 | `/api/bitbucket/callback` | GET | Bitbucket OAuth callback |
 | `/api/bitbucket/webhook/[connectionId]` | POST | Bitbucket repo webhook |
+| `/download/[platform]` | GET | Redirect to latest desktop installer |
 
 ## Contributing
 

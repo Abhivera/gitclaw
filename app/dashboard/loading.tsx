@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function DashboardLoading() {
   return (
     <>
-      <DashboardHeader title="Loading…" />
+      <DashboardHeader title="Loading…" showSidebarTrigger={false} />
       <div className="flex flex-1 flex-col gap-6 p-6">
         <div className="grid gap-4 sm:grid-cols-3">
           {Array.from({ length: 3 }).map((_, index) => (

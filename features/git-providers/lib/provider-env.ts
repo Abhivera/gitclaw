@@ -1,7 +1,12 @@
 import { getEnvValue } from "@/lib/env-helpers";
 
 export function isGitHubProviderConfigured(): boolean {
-  return Boolean(getEnvValue("GITHUB_APP_SLUG"));
+  return Boolean(
+    getEnvValue("GITHUB_APP_SLUG") &&
+      getEnvValue("GITHUB_APP_ID") &&
+      getEnvValue("GITHUB_APP_PRIVATE_KEY") &&
+      getEnvValue("GITHUB_WEBHOOK_SECRET"),
+  );
 }
 
 export function isGitlabProviderConfigured(): boolean {

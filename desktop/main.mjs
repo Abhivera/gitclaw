@@ -1,9 +1,9 @@
-import { app, BrowserWindow, Menu, Tray, dialog, shell, ipcMain, nativeImage } from "electron";
+import { app, BrowserWindow, Menu, Tray, dialog, shell, ipcMain } from "electron";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { getConfigDir, getEnvPath } from "./env.mjs";
 import { isFirstRunComplete, markFirstRunComplete } from "./first-run.mjs";
-import { getTrayIconPath } from "./paths.mjs";
+import { getAppIconPath, loadAppIcon, loadTrayIcon } from "./paths.mjs";
 import { CONFIGURATION_PATH } from "./routes.mjs";
 import {
   NEXT_PORT,
@@ -188,15 +188,13 @@ function createTray() {
     return;
   }
 
-  const iconPath = getTrayIconPath();
-  const icon = nativeImage.createFromPath(iconPath);
-
-  if (icon.isEmpty()) {
-    console.warn(`[gitclaw] Tray icon not found at ${iconPath}`);
+  const icon = loadTrayIcon();
+  if (!icon) {
+    console.warn(`[gitclaw] Tray icon not found at ${getAppIconPath()}`);
     return;
   }
 
-  tray = new Tray(icon.resize({ width: 16, height: 16 }));
+  tray = new Tray(icon);
   tray.setToolTip("GitClaw");
   tray.setContextMenu(
     Menu.buildFromTemplate([
@@ -296,6 +294,7 @@ async function createSplashWindow() {
     center: true,
     show: true,
     backgroundColor: "#0a0a0a",
+    icon: loadAppIcon() ?? undefined,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -315,6 +314,7 @@ async function createWindow() {
     minHeight: 640,
     show: false,
     autoHideMenuBar: process.platform !== "darwin",
+    icon: loadAppIcon() ?? undefined,
     webPreferences: {
       preload: path.join(__dirname, "preload.mjs"),
       contextIsolation: true,

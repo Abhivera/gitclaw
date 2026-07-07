@@ -40,5 +40,6 @@ copyRecursive(path.join(root, "public"), path.join(standaloneDir, "public"));
 copyRecursive(path.join(root, "prisma"), path.join(standaloneDir, "prisma"));
 copyRecursive(path.join(root, "lib", "generated"), path.join(standaloneDir, "lib", "generated"));
 fs.copyFileSync(path.join(root, "prisma.config.ts"), path.join(standaloneDir, "prisma.config.ts"));
+copyRecursive(path.join(root, "node_modules", "prisma"), path.join(standaloneDir, "node_modules", "prisma"));
 
 console.log(`[desktop] Standalone bundle prepared at ${standaloneDir}`);

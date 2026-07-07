@@ -48,15 +48,15 @@ export function SetupRequired() {
         })}
       </ul>
         <p className="text-xs leading-relaxed text-amber-100/70">
-        After updating <code className="text-xs">.env</code>, restart{" "}
+        After updating configuration, GitClaw{" "}
         {isDesktop ? (
-          <>GitClaw (Settings → Restart GitClaw)</>
+          <>reloads automatically when you save in Settings → Configuration.</>
         ) : (
           <>
-            <code className="text-xs">npm run dev</code>
+            needs a restart — run <code className="text-xs">npm run dev</code> again.
           </>
-        )}
-        . See README for Postgres and AI provider setup.
+        )}{" "}
+        See README for Postgres and AI provider setup.
       </p>
     </div>
   );

@@ -1,5 +1,7 @@
 import { JetBrains_Mono } from "next/font/google";
 import Image from "next/image";
+import { DownloadSection } from "@/features/marketing/components/download-section";
+import type { ReleaseDownloads } from "@/features/marketing/lib/downloads";
 import { URLS } from "@/features/marketing/lib/releases";
 import { BRAND_ICON_DARK, BRAND_ICON_MARK } from "@/lib/brand";
 import "./landing-page.css";
@@ -86,7 +88,7 @@ function LogoMark({ className, width, height }: { className: string; width: numb
   );
 }
 
-export function LandingPage() {
+export function LandingPage({ initialRelease }: { initialRelease: ReleaseDownloads | null }) {
   return (
     <div className={`marketing-landing ${jetbrainsMono.variable}`}>
       <div className="scratches" aria-hidden />
@@ -103,6 +105,8 @@ export function LandingPage() {
             <a href="#features">Features</a>
             <span className="sep">/</span>
             <a href="#self-host">Self-hosting</a>
+            <span className="sep">/</span>
+            <a href="#download">Download</a>
             <span className="sep">/</span>
             <a href={URLS.quickstart}>Quickstart</a>
             <span className="sep">/</span>
@@ -228,6 +232,18 @@ export function LandingPage() {
             wherever you already run things, talks to the model provider you choose, and keeps every
             diff inside infrastructure you control. The dashboard is yours; the data never leaves.
           </p>
+        </section>
+
+        <hr className="rule" />
+
+        <section id="download">
+          <div className="eyebrow">DESKTOP APP</div>
+          <h2>Download for your machine</h2>
+          <p className="section-desc">
+            Native installers with embedded Postgres — no Docker required. Hosted on{" "}
+            <code>gitclaw.online</code> when available.
+          </p>
+          <DownloadSection initialRelease={initialRelease} />
         </section>
 
         <hr className="rule" />

@@ -81,7 +81,7 @@ export const landingJsonLd = {
   keywords:
     "AI code review robot, PR review bot, AI agent, CodeRabbit alternative, CodeRabbit open source alternative, self-hosted, open source, GitHub, GitLab, Bitbucket",
   url: siteUrl,
-  downloadUrl: URLS.releasesLatest,
+  downloadUrl: `${siteUrl}/download/windows`,
   codeRepository: URLS.repo,
   license: "https://opensource.org/licenses/MIT",
   isAccessibleForFree: true,

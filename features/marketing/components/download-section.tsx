@@ -9,10 +9,11 @@ import { DownloadCard } from "@/features/marketing/components/download-card";
 import { WindowsIcon } from "@/features/marketing/components/windows-icon";
 import {
   detectPlatform,
+  resolveMacDownload,
   type PlatformKey,
   type ReleaseDownloads,
-  URLS,
-} from "@/features/marketing/lib/releases";
+} from "@/features/marketing/lib/downloads";
+import { URLS } from "@/features/marketing/lib/releases";
 
 function subscribeToPlatform() {
   return () => {};
@@ -36,6 +37,7 @@ export function DownloadSection({ initialRelease }: DownloadSectionProps) {
     getClientPlatform,
     getServerPlatform,
   );
+  const macDownload = resolveMacDownload(initialRelease);
 
   function suggested(p: PlatformKey): boolean {
     return platform === p;
@@ -47,22 +49,13 @@ export function DownloadSection({ initialRelease }: DownloadSectionProps) {
         Desktop builds
       </h2>
       <p className="mb-6 text-center text-sm text-zinc-500">
-        Prefer a packaged app? Download GitClaw for Windows, macOS, or Linux when installers are
-        published on GitHub Releases.
+        Prefer a packaged app? Download GitClaw for Windows, macOS, or Linux from{" "}
+        <code className="text-zinc-400">gitclaw.online/downloads</code>.
       </p>
 
       {initialRelease === null && (
         <p className="mb-4 text-center text-sm leading-relaxed text-zinc-500">
-          No release with installer files on GitHub yet. The cards below open{" "}
-          <a
-            href={URLS.releasesLatest}
-            className="text-zinc-400 underline decoration-white/15 underline-offset-2 hover:text-[#b29bbd]"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Releases
-          </a>
-          . Self-host with Docker above, or run from source via the{" "}
+          Installers are not published yet. Self-host with Docker above, or run from source via the{" "}
           <a
             href={URLS.repo}
             className="text-zinc-400 underline decoration-white/15 underline-offset-2 hover:text-[#b29bbd]"
@@ -78,7 +71,7 @@ export function DownloadSection({ initialRelease }: DownloadSectionProps) {
         <DownloadCard
           title="Windows"
           description="NSIS installer (.exe) for running GitClaw on Windows."
-          href={initialRelease?.windows?.url ?? URLS.releasesLatest}
+          href={initialRelease?.windows?.url ?? `${URLS.download}/windows`}
           fileLabel={initialRelease?.windows?.name}
           icon={WindowsIcon}
           highlight={suggested("windows")}
@@ -86,15 +79,15 @@ export function DownloadSection({ initialRelease }: DownloadSectionProps) {
         <DownloadCard
           title="macOS"
           description="Disk image (.dmg). Open and drag GitClaw into Applications."
-          href={initialRelease?.macos?.url ?? URLS.releasesLatest}
-          fileLabel={initialRelease?.macos?.name}
+          href={macDownload?.url ?? `${URLS.download}/macos`}
+          fileLabel={macDownload?.name}
           icon={AppleLogoIcon}
           highlight={suggested("macos")}
         />
         <DownloadCard
           title="Linux (AppImage)"
           description="Portable binary. chmod +x then run."
-          href={initialRelease?.linuxAppImage?.url ?? URLS.releasesLatest}
+          href={initialRelease?.linuxAppImage?.url ?? `${URLS.download}/linux`}
           fileLabel={initialRelease?.linuxAppImage?.name}
           icon={RobotIcon}
           highlight={suggested("linux")}
@@ -102,7 +95,7 @@ export function DownloadSection({ initialRelease }: DownloadSectionProps) {
         <DownloadCard
           title="Linux (.deb)"
           description="For Debian / Ubuntu. Install with your package manager."
-          href={initialRelease?.linuxDeb?.url ?? URLS.releasesLatest}
+          href={initialRelease?.linuxDeb?.url ?? `${URLS.download}/deb`}
           fileLabel={initialRelease?.linuxDeb?.name}
           icon={RobotIcon}
           highlight={false}

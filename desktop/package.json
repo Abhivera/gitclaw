@@ -13,8 +13,12 @@
   "type": "module",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --publish never",
-    "dist:dir": "electron-builder --dir --publish never"
+    "icons": "node scripts/prepare-icons.mjs",
+    "dist": "npm run icons && electron-builder --publish never",
+    "dist:win": "npm run icons && electron-builder --win --publish never",
+    "dist:mac": "npm run icons && electron-builder --mac --publish never",
+    "dist:linux": "npm run icons && electron-builder --linux --publish never",
+    "dist:dir": "npm run icons && electron-builder --dir --publish never"
   },
   "dependencies": {
     "embedded-postgres": "17.10.0-beta.17"
@@ -27,6 +31,7 @@
     "appId": "com.gitclaw.app",
     "productName": "GitClaw",
     "copyright": "Copyright © GitClaw contributors",
+    "icon": "icons/icon.png",
     "directories": {
       "output": "../release/desktop"
     },
@@ -40,7 +45,9 @@
       "paths.mjs",
       "routes.mjs",
       "splash.html",
-      "package.json"
+      "splash-mark.png",
+      "package.json",
+      "icons/**"
     ],
     "extraResources": [
       {
@@ -49,8 +56,12 @@
         "filter": ["**/*"]
       },
       {
-        "from": "../public/favicon.ico",
-        "to": "tray-icon.ico"
+        "from": "icons/icon.ico",
+        "to": "app-icon.ico"
+      },
+      {
+        "from": "icons/icon.png",
+        "to": "app-icon.png"
       }
     ],
     "asar": true,
@@ -65,6 +76,7 @@
           "arch": ["x64"]
         }
       ],
+      "icon": "icons/icon.ico",
       "signAndEditExecutable": false,
       "artifactName": "GitClaw-Setup-${version}.${ext}"
     },
@@ -80,8 +92,12 @@
           "arch": ["x64", "arm64"]
         }
       ],
+      "icon": "icons/icon.png",
       "category": "public.app-category.developer-tools",
-      "artifactName": "GitClaw-${version}-${arch}.${ext}"
+      "artifactName": "GitClaw-${version}-${arch}.${ext}",
+      "identity": null,
+      "gatekeeperAssess": false,
+      "hardenedRuntime": false
     },
     "dmg": {
       "artifactName": "GitClaw-${version}-${arch}.${ext}"
@@ -97,9 +113,12 @@
           "arch": ["x64"]
         }
       ],
+      "icon": "icons/icon.png",
       "category": "Development",
       "artifactName": "GitClaw-${version}-${arch}.${ext}",
-      "maintainer": "GitClaw contributors"
+      "maintainer": "GitClaw contributors",
+      "synopsis": "Self-hosted AI PR reviewer",
+      "description": "GitClaw desktop app with embedded PostgreSQL — no Docker required."
     }
   }
 }

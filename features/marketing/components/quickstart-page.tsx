@@ -1,7 +1,9 @@
 import { JetBrains_Mono } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
+import { DownloadSection } from "@/features/marketing/components/download-section";
 import { QuickstartCodeBlock } from "@/features/marketing/components/quickstart-code-block";
+import type { ReleaseDownloads } from "@/features/marketing/lib/downloads";
 import { REPO, URLS } from "@/features/marketing/lib/releases";
 import { BRAND_ICON_DARK } from "@/lib/brand";
 import "./landing-page.css";
@@ -37,7 +39,7 @@ const TUNNEL_NGROK = `ngrok http 3000`;
 
 const TUNNEL_CLOUDFLARED = `cloudflared tunnel --url http://127.0.0.1:3000`;
 
-export function QuickstartPage() {
+export function QuickstartPage({ initialRelease }: { initialRelease: ReleaseDownloads | null }) {
   return (
     <div className={`marketing-landing ${jetbrainsMono.variable}`}>
       <div className="scratches" aria-hidden />
@@ -234,15 +236,8 @@ export function QuickstartPage() {
                 <span className="guide-step-num">C</span>
                 <h3>Desktop app — download and launch</h3>
               </div>
+              <DownloadSection initialRelease={initialRelease} />
               <ol>
-                <li>
-                  Download the latest installer from{" "}
-                  <a href={URLS.releasesLatest} target="_blank" rel="noreferrer">
-                    GitHub Releases
-                  </a>{" "}
-                  (Windows <code>.exe</code>, macOS <code>.dmg</code>, Linux{" "}
-                  <code>.AppImage</code> or <code>.deb</code>).
-                </li>
                 <li>Install and open GitClaw. The dashboard opens automatically.</li>
                 <li>
                   Go to <b>File → Open configuration folder</b> and edit <code>.env</code> with your

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { DASHBOARD_ROUTES } from "@/features/dashboard/lib/routes";
 import { LandingPage } from "@/features/marketing/components/landing-page";
+import { fetchLatestDownloads } from "@/features/marketing/lib/downloads.server";
 import {
   landingJsonLd,
   landingMetadata,
@@ -9,10 +10,12 @@ import { isCoreEnvConfigured } from "@/lib/env";
 
 export const metadata = landingMetadata;
 
-export default function Home() {
+export default async function Home() {
   if (isCoreEnvConfigured()) {
     redirect(DASHBOARD_ROUTES.overview);
   }
+
+  const initialRelease = await fetchLatestDownloads();
 
   return (
     <>
@@ -20,7 +23,7 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(landingJsonLd) }}
       />
-      <LandingPage />
+      <LandingPage initialRelease={initialRelease} />
     </>
   );
 }

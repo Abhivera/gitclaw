@@ -16,6 +16,11 @@
 /build
 /dist
 /release
+/desktop/icons
+/desktop/splash-mark.png
+/public/downloads/*
+!/public/downloads/.gitkeep
+!/public/downloads/downloads.json
 
 # Prisma (generated client — recreated by `prisma generate` / postinstall)
 /lib/generated/

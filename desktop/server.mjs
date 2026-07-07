@@ -28,9 +28,18 @@ function runCommand(command, args, options) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, options);
     let stderr = "";
+    let stdout = "";
+
+    child.stdout?.on("data", (chunk) => {
+      const text = chunk.toString();
+      stdout += text;
+      console.log(`[gitclaw] ${text.trimEnd()}`);
+    });
 
     child.stderr?.on("data", (chunk) => {
-      stderr += chunk.toString();
+      const text = chunk.toString();
+      stderr += text;
+      console.error(`[gitclaw] ${text.trimEnd()}`);
     });
 
     child.on("error", reject);
@@ -40,7 +49,7 @@ function runCommand(command, args, options) {
         return;
       }
 
-      reject(new Error(stderr.trim() || `Command failed with exit code ${code}`));
+      reject(new Error(stderr.trim() || stdout.trim() || `Command failed with exit code ${code}`));
     });
   });
 }
@@ -65,13 +74,35 @@ async function waitForServer(port, timeoutMs = 120_000) {
 }
 
 async function runMigrations(standaloneDir, runtimeEnv) {
-  const prismaCli = path.join(standaloneDir, "node_modules", "prisma", "build", "index.js");
+  const prismaCli = resolvePrismaCli(standaloneDir);
 
   await runCommand(process.execPath, [prismaCli, "migrate", "deploy"], {
     cwd: standaloneDir,
     env: runtimeEnv,
-    stdio: "inherit",
+    stdio: "pipe",
   });
+}
+
+function resolvePrismaCli(standaloneDir) {
+  const candidates = [
+    path.join(standaloneDir, "node_modules", "prisma", "build", "index.js"),
+  ];
+
+  if (!app.isPackaged) {
+    candidates.push(
+      path.join(standaloneDir, "..", "..", "node_modules", "prisma", "build", "index.js"),
+    );
+  }
+
+  for (const candidate of candidates) {
+    if (requireExists(candidate)) {
+      return candidate;
+    }
+  }
+
+  throw new Error(
+    "Prisma CLI not found in the desktop bundle. Run `npm run desktop:build:next` from the repo root.",
+  );
 }
 
 function buildRuntimeEnv(fileEnv) {
@@ -85,6 +116,8 @@ function buildRuntimeEnv(fileEnv) {
     NODE_ENV: "production",
     PORT: String(NEXT_PORT),
     HOSTNAME: "127.0.0.1",
+    // Run Node scripts (Prisma CLI, Next standalone) under Electron's embedded Node.
+    ELECTRON_RUN_AS_NODE: "1",
   };
 }
 
@@ -208,7 +241,11 @@ export async function startGitClawServer() {
     persistent: true,
   });
 
-  await postgres.initialise();
+  const pgVersionFile = path.join(dataDir, "PG_VERSION");
+  if (!fs.existsSync(pgVersionFile)) {
+    await postgres.initialise();
+  }
+
   await postgres.start();
 
   const runtimeEnv = buildRuntimeEnv(fileEnv);

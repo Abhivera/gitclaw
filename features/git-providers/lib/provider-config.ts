@@ -21,9 +21,10 @@ const SETUP_HINTS_WEB: Record<GitProvider, string> = {
 
 const SETUP_HINTS_DESKTOP: Record<GitProvider, string> = {
   github:
-    "Add your GitHub App slug, ID, private key, and webhook secret in Settings → Configuration.",
-  gitlab: "Add your GitLab OAuth client ID and secret in Settings → Configuration.",
-  bitbucket: "Add your Bitbucket OAuth consumer key and secret in Settings → Configuration.",
+    "Add your GitHub App details in the setup wizard or Settings → Configuration.",
+  gitlab: "Add your GitLab OAuth credentials in the setup wizard or Settings → Configuration.",
+  bitbucket:
+    "Add your Bitbucket OAuth credentials in the setup wizard or Settings → Configuration.",
 };
 
 export function getProviderSetup(provider: GitProvider): ProviderSetup {
