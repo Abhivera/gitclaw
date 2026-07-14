@@ -124,7 +124,7 @@ async function fetchGithubPrFiles(
   const octokit = await getInstallationOctokit(connection.externalId);
   const { owner, repo } = splitOwnerRepo(pullRequest.repoFullName);
 
-  const { data } = await octokit.request(
+  const data = await octokit.paginate(
     "GET /repos/{owner}/{repo}/pulls/{pull_number}/files",
     { owner, repo, pull_number: pullRequest.prNumber, per_page: 100 }
   );
@@ -138,6 +138,9 @@ async function fetchGithubPrFiles(
   }
   return files;
 }
+
+/** GitHub rejects review payloads with too many inline comments; batch safely. */
+const GITHUB_REVIEW_COMMENT_BATCH_SIZE = 50;
 
 export const githubAdapter: GitProviderAdapter = {
   provider: "github",
@@ -264,18 +267,40 @@ export const githubAdapter: GitProviderAdapter = {
       body: formatFindingBody(finding),
     }));
 
-    await octokit.request(
-      "POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews",
-      {
-        owner,
-        repo,
-        pull_number: pullRequest.prNumber,
-        commit_id: pullRequest.headSha,
-        body: summary,
-        event: "COMMENT",
-        comments,
-      }
-    );
+    if (comments.length === 0) {
+      await octokit.request(
+        "POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews",
+        {
+          owner,
+          repo,
+          pull_number: pullRequest.prNumber,
+          commit_id: pullRequest.headSha,
+          body: summary,
+          event: "COMMENT",
+          comments: [],
+        }
+      );
+      return;
+    }
+
+    for (let i = 0; i < comments.length; i += GITHUB_REVIEW_COMMENT_BATCH_SIZE) {
+      const batch = comments.slice(i, i + GITHUB_REVIEW_COMMENT_BATCH_SIZE);
+      const isFirst = i === 0;
+      await octokit.request(
+        "POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews",
+        {
+          owner,
+          repo,
+          pull_number: pullRequest.prNumber,
+          commit_id: pullRequest.headSha,
+          body: isFirst
+            ? summary
+            : `GitClaw review (continued, comments ${i + 1}–${i + batch.length})`,
+          event: "COMMENT",
+          comments: batch,
+        }
+      );
+    }
   },
 
   async fetchFileContent(connection, repoFullName, filePath, ref) {

@@ -23,13 +23,6 @@ export async function loadRepositoryConfig(
   repository: RepositoryRecord,
   options?: { forceRefresh?: boolean }
 ): Promise<GitclawConfig> {
-  if (!options?.forceRefresh && repository.config) {
-    const cached = gitclawConfigSchema.safeParse(repository.config);
-    if (cached.success) {
-      return cached.data;
-    }
-  }
-
   const adapter = getProviderAdapter(repository.provider);
   const remote = await adapter.fetchGitclawConfig(
     connection,
@@ -43,6 +36,18 @@ export async function loadRepositoryConfig(
       data: { config: DEFAULT_GITCLAW_CONFIG, configSha: null },
     });
     return DEFAULT_GITCLAW_CONFIG;
+  }
+
+  // Reuse the DB cache when the remote file SHA is unchanged.
+  if (
+    !options?.forceRefresh &&
+    repository.configSha === remote.sha &&
+    repository.config
+  ) {
+    const cached = gitclawConfigSchema.safeParse(repository.config);
+    if (cached.success) {
+      return cached.data;
+    }
   }
 
   const config = parseGitclawConfig(remote.content);

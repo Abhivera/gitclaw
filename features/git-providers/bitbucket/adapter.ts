@@ -21,6 +21,7 @@ type BitbucketWebhookPayload = {
     id: number;
     title: string;
     state?: string;
+    draft?: boolean;
     description?: string;
     author?: { display_name?: string };
     source: {
@@ -130,7 +131,7 @@ export const bitbucketAdapter: GitProviderAdapter = {
       authorLogin: event.pullrequest.author?.display_name ?? null,
       headSha: event.pullrequest.source.commit.hash,
       baseBranch: event.pullrequest.destination.branch.name,
-      isDraft: false,
+      isDraft: event.pullrequest.draft === true,
     };
   },
 

@@ -127,12 +127,14 @@ function scanPatch(
   }
 
   for (const { pattern, message, severity } of patterns) {
-    const match = pattern.exec(file.patch);
-    if (match) {
+    const globalPattern = pattern.global
+      ? pattern
+      : new RegExp(pattern.source, `${pattern.flags}g`);
+    for (const match of file.patch.matchAll(globalPattern)) {
       findings.push({
         tool,
         file: file.filePath,
-        line: lineNumberInPatch(file.patch, match.index),
+        line: lineNumberInPatch(file.patch, match.index ?? 0),
         severity,
         message,
       });
@@ -146,12 +148,14 @@ function scanGitleaks(file: PrFile): StaticAnalysisFinding[] {
   const findings: StaticAnalysisFinding[] = [];
 
   for (const { pattern, message } of GITLEAKS_PATTERNS) {
-    const match = pattern.exec(file.patch);
-    if (match) {
+    const globalPattern = pattern.global
+      ? pattern
+      : new RegExp(pattern.source, `${pattern.flags}g`);
+    for (const match of file.patch.matchAll(globalPattern)) {
       findings.push({
         tool: "gitleaks",
         file: file.filePath,
-        line: lineNumberInPatch(file.patch, match.index),
+        line: lineNumberInPatch(file.patch, match.index ?? 0),
         severity: "issue",
         message,
       });

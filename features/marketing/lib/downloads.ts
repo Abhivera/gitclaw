@@ -1,4 +1,5 @@
 export type PlatformKey = "windows" | "macos" | "linux";
+export type DownloadTarget = PlatformKey | "deb";
 
 export interface ReleaseDownloads {
   windows?: { name: string; url: string };
@@ -37,7 +38,7 @@ export function resolveMacDownload(
 
 export function resolvePlatformDownload(
   release: ReleaseDownloads | null,
-  platform: PlatformKey,
+  platform: DownloadTarget,
 ): { name: string; url: string } | undefined {
   if (!release) return undefined;
 
@@ -48,23 +49,7 @@ export function resolvePlatformDownload(
       return resolveMacDownload(release);
     case "linux":
       return release.linuxAppImage ?? release.linuxDeb;
+    case "deb":
+      return release.linuxDeb;
   }
-}
-
-export function getPrimaryDownloadUrl(
-  release: ReleaseDownloads | null,
-  fallbackUrl: string,
-): string {
-  if (!release) {
-    return fallbackUrl;
-  }
-
-  return (
-    release.windows?.url ??
-    release.macosArm64?.url ??
-    release.macosX64?.url ??
-    release.linuxAppImage?.url ??
-    release.linuxDeb?.url ??
-    release.htmlUrl
-  );
 }

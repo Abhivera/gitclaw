@@ -1,5 +1,4 @@
 export const DOCS_ENV_VARS_URL = "https://github.com/Abhivera/gitclaw#environment-variables";
-export const DOCS_README_URL = "https://github.com/Abhivera/gitclaw#readme";
 export const DOCS_GITHUB_URL = "https://github.com/Abhivera/gitclaw#github";
 export const DOCS_GITLAB_BITBUCKET_URL =
   "https://github.com/Abhivera/gitclaw#gitlab--bitbucket-optional";

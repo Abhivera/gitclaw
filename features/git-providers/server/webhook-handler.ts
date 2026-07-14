@@ -115,6 +115,12 @@ export async function handleProviderWebhook(
     request.headers.get("x-event-key") === "pullrequest:created";
 
   if (gate.skip) {
+    // duplicate_sha means this commit was already reviewed — never overwrite
+    // reviewed/processing/pending status with "skipped".
+    if (gate.reason === "duplicate_sha" && existing) {
+      return Response.json({ received: true, skipped: gate.reason });
+    }
+
     const saved = await savePullRequest(connection.id, normalized, {
       status: "skipped",
       skipReason: gate.reason,
@@ -126,6 +132,15 @@ export async function handleProviderWebhook(
     }
 
     return Response.json({ received: true, skipped: gate.reason });
+  }
+
+  // Same head SHA already queued or running — avoid overlapping reviews.
+  if (
+    existing &&
+    existing.headSha === normalized.headSha &&
+    (existing.status === "pending" || existing.status === "processing")
+  ) {
+    return Response.json({ received: true, skipped: "in_progress" });
   }
 
   const pullRequest = await savePullRequest(connection.id, normalized, {

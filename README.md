@@ -296,6 +296,7 @@ features/
   config/                    # .gitclaw.yaml parse and apply
   dashboard/                 # Shell, nav, queries
   marketing/                 # Landing page, quickstart, download pages
+  setup/                     # Desktop setup wizard and configuration UI
   analytics/                 # Dashboard charts
   organizations/             # Workspaces
   notifications/             # Slack webhooks

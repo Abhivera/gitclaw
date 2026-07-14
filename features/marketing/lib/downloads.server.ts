@@ -44,20 +44,31 @@ export function getDownloadBaseUrl(): string {
 function toSiteDownload(
   baseUrl: string,
   entry: SiteDownloadEntry | undefined,
+  options?: { requireLocalFile?: boolean },
 ): { name: string; url: string } | undefined {
   if (!entry) return undefined;
+  if (options?.requireLocalFile) {
+    const filePath = path.join(process.cwd(), "public", "downloads", entry.file);
+    if (!fs.existsSync(filePath)) {
+      return undefined;
+    }
+  }
   return {
     name: entry.name,
     url: `${baseUrl}/${encodeURIComponent(entry.file)}`,
   };
 }
 
-function parseSiteManifest(manifest: SiteDownloadManifest, baseUrl: string): ReleaseDownloads | null {
-  const windows = toSiteDownload(baseUrl, manifest.windows);
-  const macosArm64 = toSiteDownload(baseUrl, manifest.macosArm64);
-  const macosX64 = toSiteDownload(baseUrl, manifest.macosX64);
-  const linuxAppImage = toSiteDownload(baseUrl, manifest.linuxAppImage);
-  const linuxDeb = toSiteDownload(baseUrl, manifest.linuxDeb);
+function parseSiteManifest(
+  manifest: SiteDownloadManifest,
+  baseUrl: string,
+  options?: { requireLocalFile?: boolean },
+): ReleaseDownloads | null {
+  const windows = toSiteDownload(baseUrl, manifest.windows, options);
+  const macosArm64 = toSiteDownload(baseUrl, manifest.macosArm64, options);
+  const macosX64 = toSiteDownload(baseUrl, manifest.macosX64, options);
+  const linuxAppImage = toSiteDownload(baseUrl, manifest.linuxAppImage, options);
+  const linuxDeb = toSiteDownload(baseUrl, manifest.linuxDeb, options);
 
   if (!windows && !macosArm64 && !macosX64 && !linuxAppImage && !linuxDeb) {
     return null;
@@ -74,6 +85,37 @@ function parseSiteManifest(manifest: SiteDownloadManifest, baseUrl: string): Rel
     linuxAppImage,
     linuxDeb,
   };
+}
+
+function mergeDownloads(
+  preferred: ReleaseDownloads,
+  fallback: ReleaseDownloads,
+): ReleaseDownloads {
+  const windows = preferred.windows ?? fallback.windows;
+  const macosArm64 = preferred.macosArm64 ?? fallback.macosArm64;
+  const macosX64 = preferred.macosX64 ?? fallback.macosX64;
+  const linuxAppImage = preferred.linuxAppImage ?? fallback.linuxAppImage;
+  const linuxDeb = preferred.linuxDeb ?? fallback.linuxDeb;
+
+  return {
+    tag: preferred.tag || fallback.tag,
+    htmlUrl: preferred.htmlUrl || fallback.htmlUrl,
+    source: preferred.source,
+    windows,
+    macos: macosArm64 ?? macosX64 ?? preferred.macos ?? fallback.macos,
+    macosArm64,
+    macosX64,
+    linuxAppImage,
+    linuxDeb,
+  };
+}
+
+function isCompleteRelease(release: ReleaseDownloads): boolean {
+  return Boolean(
+    release.windows &&
+      (release.macosArm64 || release.macosX64 || release.macos) &&
+      (release.linuxAppImage || release.linuxDeb),
+  );
 }
 
 function pickWindows(assets: GitHubAsset[]): GitHubAsset | undefined {
@@ -141,7 +183,8 @@ function readLocalSiteManifest(): ReleaseDownloads | null {
     }
 
     const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8")) as SiteDownloadManifest;
-    return parseSiteManifest(manifest, getDownloadBaseUrl());
+    // Only advertise binaries that are actually present (gitignore excludes installers).
+    return parseSiteManifest(manifest, getDownloadBaseUrl(), { requireLocalFile: true });
   } catch {
     return null;
   }
@@ -182,15 +225,18 @@ async function fetchGitHubDownloads(): Promise<ReleaseDownloads | null> {
 }
 
 export async function fetchLatestDownloads(): Promise<ReleaseDownloads | null> {
-  const local = readLocalSiteManifest();
-  if (local) {
-    return local;
-  }
+  const site = readLocalSiteManifest() ?? (await fetchSiteDownloads());
 
-  const site = await fetchSiteDownloads();
-  if (site) {
+  // Partial site manifests (e.g. Windows-only) must not block GitHub fallbacks
+  // for missing macOS/Linux installers.
+  if (site && isCompleteRelease(site)) {
     return site;
   }
 
-  return fetchGitHubDownloads();
+  const github = await fetchGitHubDownloads();
+  if (site && github) {
+    return mergeDownloads(site, github);
+  }
+
+  return site ?? github;
 }

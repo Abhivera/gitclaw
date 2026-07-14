@@ -54,6 +54,9 @@ export async function findExistingPullRequest(
       connectionId_repoFullName_prNumber: { connectionId, repoFullName, prNumber },
     },
     select: {
+      id: true,
+      status: true,
+      headSha: true,
       lastReviewedSha: true,
     },
   });

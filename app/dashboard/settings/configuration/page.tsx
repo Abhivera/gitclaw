@@ -40,6 +40,7 @@ export default function DesktopConfigurationPage() {
       <DashboardHeader
         title="Configuration"
         description="Manage Git providers, AI keys, and advanced desktop settings without editing .env by hand."
+        showSidebarTrigger={false}
       />
       <div className="flex flex-1 flex-col gap-6 p-6 pb-24">
         {configApiAvailable ? <DesktopConfigurationForm /> : <DesktopConfigurationUnavailable />}

@@ -15,7 +15,8 @@
 # Build output
 /build
 /dist
-/release
+/release/*
+!/release/.gitkeep
 /desktop/icons
 /desktop/splash-mark.png
 /public/downloads/*

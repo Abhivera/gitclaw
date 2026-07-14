@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
-import { fetchLatestDownloads } from "@/features/marketing/lib/downloads.server";
 import {
-  resolveMacDownload,
-  type PlatformKey,
+  resolvePlatformDownload,
+  type DownloadTarget,
 } from "@/features/marketing/lib/downloads";
+import { fetchLatestDownloads } from "@/features/marketing/lib/downloads.server";
+import { URLS } from "@/features/marketing/lib/releases";
 import { getSiteUrl } from "@/lib/site-url";
 
-const PLATFORM_ALIASES: Record<string, PlatformKey | "deb"> = {
+const PLATFORM_ALIASES: Record<string, DownloadTarget> = {
   windows: "windows",
   win: "windows",
   macos: "macos",
@@ -30,20 +31,10 @@ export async function GET(_request: Request, { params }: RouteParams) {
 
   const release = await fetchLatestDownloads();
   if (!release) {
-    return NextResponse.redirect(new URL("https://github.com/Abhivera/gitclaw/releases/latest"));
+    return NextResponse.redirect(URLS.releasesLatest);
   }
 
-  let target: { url: string } | undefined;
-  if (key === "deb") {
-    target = release.linuxDeb;
-  } else if (key === "macos") {
-    target = resolveMacDownload(release);
-  } else if (key === "windows") {
-    target = release.windows;
-  } else {
-    target = release.linuxAppImage ?? release.linuxDeb;
-  }
-
+  const target = resolvePlatformDownload(release, key);
   if (!target?.url) {
     return NextResponse.redirect(new URL("/quickstart#install", getSiteUrl()));
   }

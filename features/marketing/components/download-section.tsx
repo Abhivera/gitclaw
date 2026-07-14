@@ -55,14 +55,21 @@ export function DownloadSection({ initialRelease }: DownloadSectionProps) {
 
       {initialRelease === null && (
         <p className="mb-4 text-center text-sm leading-relaxed text-zinc-500">
-          Installers are not published yet. Self-host with Docker above, or run from source via the{" "}
+          Installers are not published yet. See the{" "}
+          <a
+            href={`${URLS.quickstart}#install`}
+            className="text-zinc-400 underline decoration-white/15 underline-offset-2 hover:text-[#b29bbd]"
+          >
+            Quickstart guide
+          </a>{" "}
+          for Docker and manual install, or run from source on{" "}
           <a
             href={URLS.repo}
             className="text-zinc-400 underline decoration-white/15 underline-offset-2 hover:text-[#b29bbd]"
             target="_blank"
             rel="noreferrer"
           >
-            repo
+            GitHub
           </a>
           .
         </p>

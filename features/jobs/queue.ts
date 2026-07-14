@@ -38,12 +38,15 @@ async function bootstrap(): Promise<PgBoss> {
 
   // Every queue must exist before sending or working. Durable retries with
   // exponential backoff so transient provider/AI failures recover on their own.
+  // `stately` on review queues: at most one queued + one active job per PR key,
+  // so duplicate webhooks cannot run overlapping reviews.
   await Promise.all(
     Object.values(QUEUES).map((name) =>
       boss.createQueue(name, {
         retryLimit: 3,
         retryDelay: 5,
         retryBackoff: true,
+        policy: name === QUEUES.prChatReceived ? "standard" : "stately",
       })
     )
   );
@@ -58,10 +61,25 @@ export function getBoss(): Promise<PgBoss> {
   return globalForBoss.pgBoss;
 }
 
+function singletonKeyFor(
+  name: QueueName,
+  data: PrReceivedJob | AutoDescriptionJob | ChatReceivedJob
+): string | undefined {
+  if (name === QUEUES.prChatReceived) {
+    const chat = data as ChatReceivedJob;
+    return `${chat.pullRequestId}:${chat.commentId}`;
+  }
+  if ("pullRequestId" in data) {
+    return data.pullRequestId;
+  }
+  return undefined;
+}
+
 export async function enqueue(
   name: QueueName,
   data: PrReceivedJob | AutoDescriptionJob | ChatReceivedJob
 ): Promise<void> {
   const boss = await getBoss();
-  await boss.send(name, data);
+  const singletonKey = singletonKeyFor(name, data);
+  await boss.send(name, data, singletonKey ? { singletonKey } : undefined);
 }
