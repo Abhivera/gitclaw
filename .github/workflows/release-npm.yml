@@ -1,0 +1,51 @@
+name: Release npm
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # npm provenance
+
+concurrency:
+  group: release-npm-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Build and publish gitclaw-cli
+    runs-on: ubuntu-latest
+
+    env:
+      # Build-time placeholders only; real values are injected at runtime by the CLI.
+      APP_URL: http://localhost:3000
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/gitclaw
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Build standalone bundle and pack CLI
+        run: npm run cli:build
+
+      - name: Show package contents
+        run: npm pack --dry-run
+        working-directory: cli
+
+      - name: Publish to npm
+        if: startsWith(github.ref, 'refs/tags/')
+        run: npm publish --access public --provenance
+        working-directory: cli
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

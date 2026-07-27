@@ -28,7 +28,7 @@ Engineering teams want automated, high-quality pull request review without sendi
 
 > An AI reviewer that reads your diffs — not your code — running wherever you already run things.
 
-- **Self-hosted:** Docker, manual install, or native desktop app
+- **Self-hosted:** Docker, manual install, npm package (`npx gitclaw-cli`), or native desktop app
 - **Multi-provider:** GitHub App, GitLab OAuth, Bitbucket OAuth
 - **Pluggable AI:** OpenRouter, Anthropic, Groq, or any OpenAI-compatible endpoint
 - **No separate job orchestrator:** Postgres-backed queue (pg-boss) co-located with the app
@@ -354,6 +354,10 @@ gitclaw/
 │   ├── download/[platform]/      # Installer redirect routes
 │   ├── quickstart/               # Marketing quickstart
 │   └── page.tsx                  # Landing (unconfigured) or redirect
+├── cli/                          # gitclaw-cli npm package
+│   ├── bin/gitclaw.mjs           # CLI entry (start, init, migrate, doctor)
+│   ├── lib/                      # Bundle extraction, server launcher, embedded DB
+│   └── scripts/                  # standalone.tgz packaging
 ├── components/ui/                # shadcn/ui components
 ├── desktop/                      # Electron main process
 │   ├── main.mjs                  # Window, tray, menus
@@ -484,6 +488,15 @@ Located in `desktop/package.json`. Bundles the Next.js standalone output as Elec
 
 Output directory: `release/desktop/`
 
+### 4.3 CLI package (`gitclaw-cli`)
+
+Located in `cli/`. Published to npm; runs the prebuilt Next.js standalone server from a single command (`npx gitclaw-cli start`).
+
+| Package | Role |
+| --- | --- |
+| `tar` | Extract the bundled `standalone.tgz` on first run |
+| `embedded-postgres` | Downloaded on demand into `~/.gitclaw/runtime` when `--embedded-db` is used (npm always strips nested `node_modules` from published packages, so the server bundle ships as a tarball) |
+
 ---
 
 ## 5. Applications & deployment
@@ -517,7 +530,7 @@ The primary deployable is a **Next.js 16** full-stack app serving both the dashb
 #### Behaviour notes
 
 - `/` shows the marketing landing page when `APP_URL` + `DATABASE_URL` are unset; otherwise redirects to `/dashboard`
-- `next.config.ts` enables `output: "standalone"` when `DESKTOP_BUILD=1`
+- `next.config.ts` enables `output: "standalone"` when `DESKTOP_BUILD=1` or `STANDALONE_BUILD=1`
 - `pg-boss` is listed in `serverExternalPackages` to avoid bundling issues
 
 ### 5.2 Desktop application
@@ -591,7 +604,27 @@ npm run db:migrate
 npm run dev                      # http://localhost:3000
 ```
 
-### 5.5 Environment variables
+### 5.5 npm package (`gitclaw-cli`)
+
+Runs the prebuilt server without cloning the repo or using Docker.
+
+```bash
+npx gitclaw-cli start --embedded-db   # bundled PostgreSQL (downloaded on first use)
+# or with your own database:
+npx gitclaw-cli init                  # creates ~/.gitclaw/.env
+npx gitclaw-cli start
+```
+
+| Aspect | Detail |
+| --- | --- |
+| Commands | `start`, `init`, `migrate`, `doctor` |
+| Flags | `--port` (3000), `--host` (127.0.0.1), `--embedded-db`, `--db-port` (15433) |
+| State | `~/.gitclaw` — `.env`, `app/<version>/` (extracted bundle), `postgres-data/`, `runtime/` (override with `GITCLAW_HOME`) |
+| Runtime | Sets `GITCLAW_DESKTOP=1` + `GITCLAW_CONFIG_PATH`, so the setup wizard and dashboard configuration UI work; the server restarts when `.env` changes |
+| Build | `npm run cli:build` — standalone Next build → `desktop/scripts/prepare-standalone.mjs` → `cli/standalone.tgz` (versions kept in lockstep with the root package) |
+| Publish | `npm run cli:publish`, or CI on `v*` tags (`release-npm.yml`, requires `NPM_TOKEN` secret) |
+
+### 5.6 Environment variables
 
 | Category | Variables |
 | --- | --- |
@@ -604,12 +637,13 @@ npm run dev                      # http://localhost:3000
 
 Validated in `lib/env.ts`. Template in `.env.example`.
 
-### 5.6 Deployment comparison
+### 5.7 Deployment comparison
 
 | Mode | Best for | Postgres | Public URL needed |
 | --- | --- | --- | --- |
 | **Docker Compose** | Production team server | Container (bundled) | Yes (for webhooks) |
 | **Manual + dev Postgres** | Local development | Docker sidecar | Tunnel for webhooks |
+| **npm (`npx gitclaw-cli`)** | Quick start without cloning | Own instance or `--embedded-db` | Tunnel for webhooks |
 | **Desktop app** | Individual developer machine | Embedded (bundled) | Tunnel for webhooks |
 | **Vercel + external DB** | Marketing + light usage | External provider | Yes |
 
@@ -659,6 +693,7 @@ auto_description: true
 | --- | --- | --- |
 | `ci.yml` | Push/PR to `main` | Lint, typecheck, build |
 | `release-desktop.yml` | Tag `v*` or manual | Build Windows/macOS/Linux installers, publish GitHub Release |
+| `release-npm.yml` | Tag `v*` or manual | Build standalone bundle, publish `gitclaw-cli` to npm |
 
 ---
 

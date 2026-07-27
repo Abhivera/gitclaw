@@ -1,0 +1,40 @@
+{
+  "name": "gitclaw-cli",
+  "version": "0.1.1",
+  "description": "Self-hosted AI pull request reviewer for GitHub, GitLab, and Bitbucket.",
+  "license": "MIT",
+  "author": "GitClaw contributors",
+  "homepage": "https://gitclaw.online",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Abhivera/gitclaw.git",
+    "directory": "cli"
+  },
+  "bugs": {
+    "url": "https://github.com/Abhivera/gitclaw/issues"
+  },
+  "keywords": [
+    "ai",
+    "code-review",
+    "pull-request",
+    "github",
+    "gitlab",
+    "bitbucket",
+    "self-hosted"
+  ],
+  "type": "module",
+  "bin": {
+    "gitclaw": "bin/gitclaw.mjs"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "standalone.tgz"
+  ],
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "dependencies": {
+    "tar": "^7.5.1"
+  }
+}

@@ -29,10 +29,71 @@ function copyRecursive(src, dest) {
   }
 }
 
+/**
+ * The Prisma CLI (used for `migrate deploy` at runtime) requires its full
+ * dependency tree, which Next's file tracing does not include. Walk the
+ * dependency graph from `prisma` and copy every package.
+ */
+
+function collectDependencyClosure(packageName, visited) {
+  if (visited.has(packageName)) {
+    return;
+  }
+
+  const packageDir = path.join(root, "node_modules", ...packageName.split("/"));
+  if (!fs.existsSync(packageDir)) {
+    // Optional or platform-specific dependency that npm did not install.
+    return;
+  }
+
+  visited.add(packageName);
+  const pkg = JSON.parse(fs.readFileSync(path.join(packageDir, "package.json"), "utf8"));
+  const dependencies = { ...pkg.dependencies, ...pkg.optionalDependencies };
+
+  for (const dependency of Object.keys(dependencies)) {
+    collectDependencyClosure(dependency, visited);
+  }
+}
+
+function copyPrismaCli() {
+  const packages = new Set();
+  collectDependencyClosure("prisma", packages);
+
+  for (const packageName of packages) {
+    const segments = packageName.split("/");
+    copyRecursive(
+      path.join(root, "node_modules", ...segments),
+      path.join(standaloneDir, "node_modules", ...segments),
+    );
+  }
+
+  // Platform-specific schema engine binaries (~20 MB each) are excluded; the
+  // Prisma 7 CLI uses the bundled WASM schema engine for migrations.
+  const enginesDir = path.join(standaloneDir, "node_modules", "@prisma", "engines");
+  if (fs.existsSync(enginesDir)) {
+    for (const entry of fs.readdirSync(enginesDir)) {
+      if (entry.startsWith("schema-engine")) {
+        fs.rmSync(path.join(enginesDir, entry), { force: true });
+      }
+    }
+  }
+
+  console.log(`[desktop] Copied Prisma CLI with ${packages.size} dependency packages`);
+}
+
 if (!fs.existsSync(standaloneDir)) {
   throw new Error(
     "`.next/standalone` not found. Run `npm run desktop:build:next` with DESKTOP_BUILD=1 first.",
   );
+}
+
+// `next build` copies local .env files into the standalone output. Never ship
+// them — desktop and CLI launchers inject configuration at runtime instead.
+for (const entry of fs.readdirSync(standaloneDir)) {
+  if (entry === ".env" || entry.startsWith(".env.")) {
+    fs.rmSync(path.join(standaloneDir, entry), { force: true });
+    console.log(`[desktop] Removed ${entry} from standalone bundle`);
+  }
 }
 
 copyRecursive(path.join(root, ".next", "static"), path.join(standaloneDir, ".next", "static"));
@@ -40,6 +101,6 @@ copyRecursive(path.join(root, "public"), path.join(standaloneDir, "public"));
 copyRecursive(path.join(root, "prisma"), path.join(standaloneDir, "prisma"));
 copyRecursive(path.join(root, "lib", "generated"), path.join(standaloneDir, "lib", "generated"));
 fs.copyFileSync(path.join(root, "prisma.config.ts"), path.join(standaloneDir, "prisma.config.ts"));
-copyRecursive(path.join(root, "node_modules", "prisma"), path.join(standaloneDir, "node_modules", "prisma"));
+copyPrismaCli();
 
 console.log(`[desktop] Standalone bundle prepared at ${standaloneDir}`);

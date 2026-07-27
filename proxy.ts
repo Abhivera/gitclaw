@@ -11,7 +11,7 @@ const SETUP_PATHS = new Set<string>([
   DASHBOARD_ROUTES.configuration,
 ]);
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   if (!isDesktopApp() || isDesktopSetupComplete()) {
     return NextResponse.next();
   }

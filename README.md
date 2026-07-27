@@ -20,6 +20,7 @@
 <p align="center">
   <a href="https://github.com/Abhivera/gitclaw/actions/workflows/ci.yml"><img src="https://github.com/Abhivera/gitclaw/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
   <a href="https://github.com/Abhivera/gitclaw/actions/workflows/release-desktop.yml"><img src="https://github.com/Abhivera/gitclaw/actions/workflows/release-desktop.yml/badge.svg" alt="Release Desktop" /></a>
+  <a href="https://www.npmjs.com/package/gitclaw-cli"><img src="https://img.shields.io/npm/v/gitclaw-cli" alt="npm" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT" /></a>
 </p>
 
@@ -90,6 +91,32 @@ docker compose up --build
 Open [http://localhost:3000](http://localhost:3000) and go to **Dashboard → Integrations**.
 
 The compose stack runs Postgres + the app. Migrations apply automatically on container start.
+
+## Quick start (npm)
+
+Run GitClaw without cloning the repository — the [`gitclaw-cli`](https://www.npmjs.com/package/gitclaw-cli) package ships the prebuilt server:
+
+```bash
+npx gitclaw-cli start --embedded-db
+```
+
+`--embedded-db` downloads a bundled PostgreSQL on first use (no Docker required). To use your own database instead:
+
+```bash
+npx gitclaw-cli init     # creates ~/.gitclaw/.env — set DATABASE_URL and keys
+npx gitclaw-cli start
+```
+
+Open [http://localhost:3000](http://localhost:3000) and finish setup from the dashboard (**Settings → Configuration**). All state lives in `~/.gitclaw` (override with `GITCLAW_HOME`).
+
+| Command | Description |
+| --- | --- |
+| `gitclaw start` | Run migrations and start the server (`--port`, `--host`, `--embedded-db`) |
+| `gitclaw init` | Create the configuration file and print its path |
+| `gitclaw migrate` | Run database migrations only |
+| `gitclaw doctor` | Print environment diagnostics |
+
+Install globally with `npm install -g gitclaw-cli` to get the `gitclaw` command.
 
 ## Manual install
 
@@ -282,11 +309,14 @@ Copy `.env.example` and set values as follows.
 | `npm run desktop:dist:linux` | Package Linux AppImage and `.deb` |
 | `npm run desktop:prepare-downloads` | Copy installers to `public/downloads/` for the website |
 | `npm run desktop:publish-downloads` | Build installers and prepare website downloads |
+| `npm run cli:build` | Build the `gitclaw-cli` npm package (standalone bundle + tarball) |
+| `npm run cli:publish` | Build and publish `gitclaw-cli` to npm |
 
 ## Project structure
 
 ```
 app/                         # Next.js routes (pages, API handlers)
+cli/                         # gitclaw-cli npm package (npx gitclaw-cli start)
 desktop/                     # Electron app (main process, packaging)
 features/
   git-providers/             # Adapters, connections, webhooks, GitHub install

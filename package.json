@@ -28,7 +28,12 @@
     "desktop:dist:linux": "npm run desktop:build:next && npm run desktop:install && npm run dist:linux --prefix desktop",
     "desktop:dist:dir": "npm run desktop:build:next && npm run desktop:install && npm run dist:dir --prefix desktop",
     "desktop:prepare-downloads": "node desktop/scripts/prepare-website-downloads.mjs",
-    "desktop:publish-downloads": "npm run desktop:dist && npm run desktop:prepare-downloads"
+    "desktop:publish-downloads": "npm run desktop:dist && npm run desktop:prepare-downloads",
+    "cli:build:next": "cross-env STANDALONE_BUILD=1 APP_URL=http://localhost:3000 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/gitclaw npm run build && node desktop/scripts/prepare-standalone.mjs",
+    "cli:install": "npm install --prefix cli",
+    "cli:pack": "node cli/scripts/pack-standalone.mjs",
+    "cli:build": "npm run cli:build:next && npm run cli:install && npm run cli:pack",
+    "cli:publish": "npm run cli:build && npm publish ./cli --access public"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.86",

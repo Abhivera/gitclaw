@@ -1,6 +1,7 @@
 # Dependencies
 /node_modules
 /desktop/node_modules
+/cli/node_modules
 /.pnp
 .pnp.*
 .yarn/*
@@ -15,6 +16,7 @@
 # Build output
 /build
 /dist
+/cli/standalone.tgz
 /release/*
 !/release/.gitkeep
 /desktop/icons
