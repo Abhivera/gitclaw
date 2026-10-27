@@ -3,7 +3,6 @@ import {
   isGitHubProviderConfigured,
   isGitlabProviderConfigured,
 } from "@/features/git-providers/lib/provider-env";
-import { INSTANCE_USER_ID } from "@/lib/instance";
 import type { GitProvider } from "@/lib/generated/prisma/client";
 import { isDesktopApp } from "@/features/setup/lib/desktop-setup";
 
@@ -47,8 +46,4 @@ export function getProviderSetup(provider: GitProvider): ProviderSetup {
         setupHint: hints.bitbucket,
       };
   }
-}
-
-export function validateOAuthState(state: string | null): boolean {
-  return Boolean(state && state === INSTANCE_USER_ID);
 }

@@ -1,3 +1,4 @@
+import { AI_TRUST_POLICY, prepareAiPrompt, safeAiOutput } from "@/features/ai/security";
 import { generateText } from "ai";
 import { getReviewModel } from "@/features/ai";
 import type { PrFile } from "../types/review";
@@ -25,13 +26,16 @@ export async function generatePrDescription(
 
   const { text, usage } = await generateText({
     model: getReviewModel(),
-    system: SYSTEM_PROMPT,
-    prompt: `Repository: ${input.repoFullName}
+    system: `${AI_TRUST_POLICY}\n\n${SYSTEM_PROMPT}`,
+    abortSignal: AbortSignal.timeout(60_000),
+    maxRetries: 1,
+    maxOutputTokens: 8_000,
+    prompt: prepareAiPrompt(`Repository: ${input.repoFullName}
 PR title: ${input.title}
 
 ## Diff
 
-${diff}`,
+${diff}`),
   });
 
   if (usage) {
@@ -42,5 +46,5 @@ ${diff}`,
     });
   }
 
-  return text;
+  return safeAiOutput(text);
 }

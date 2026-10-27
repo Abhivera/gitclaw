@@ -10,7 +10,14 @@ export function parseGitclawConfig(raw: string): GitclawConfig {
     return DEFAULT_GITCLAW_CONFIG;
   }
 
-  const parsed = parseYaml(raw);
+  if (raw.length > 64_000) return DEFAULT_GITCLAW_CONFIG;
+  let parsed: unknown;
+  try {
+    parsed = parseYaml(raw, { maxAliasCount: 50 });
+  } catch {
+    console.warn("[gitclaw] malformed .gitclaw.yaml, using defaults");
+    return DEFAULT_GITCLAW_CONFIG;
+  }
   if (!parsed || typeof parsed !== "object") {
     return DEFAULT_GITCLAW_CONFIG;
   }

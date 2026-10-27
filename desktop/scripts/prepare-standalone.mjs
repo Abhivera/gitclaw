@@ -67,16 +67,8 @@ function copyPrismaCli() {
     );
   }
 
-  // Platform-specific schema engine binaries (~20 MB each) are excluded; the
-  // Prisma 7 CLI uses the bundled WASM schema engine for migrations.
-  const enginesDir = path.join(standaloneDir, "node_modules", "@prisma", "engines");
-  if (fs.existsSync(enginesDir)) {
-    for (const entry of fs.readdirSync(enginesDir)) {
-      if (entry.startsWith("schema-engine")) {
-        fs.rmSync(path.join(enginesDir, entry), { force: true });
-      }
-    }
-  }
+  // Keep the build machine's schema engine. `migrate deploy` needs it on first
+  // launch; removing it forces an engine download on the end user's machine.
 
   console.log(`[desktop] Copied Prisma CLI with ${packages.size} dependency packages`);
 }

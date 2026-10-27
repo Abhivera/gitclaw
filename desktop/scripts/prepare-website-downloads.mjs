@@ -58,9 +58,11 @@ if (!fs.existsSync(releaseDir)) {
   );
 }
 
+const version = readVersion();
 const releaseFiles = fs
   .readdirSync(releaseDir)
-  .filter((name) => fs.statSync(path.join(releaseDir, name)).isFile());
+  .filter((name) => fs.statSync(path.join(releaseDir, name)).isFile())
+  .filter((name) => name.includes(`-${version}.`) || name.includes(`-${version}-`));
 
 const artifacts = pickArtifacts(releaseFiles);
 const copied = Object.values(artifacts).filter(Boolean);
@@ -77,7 +79,6 @@ for (const fileName of copied) {
   fs.copyFileSync(path.join(releaseDir, fileName), path.join(downloadsDir, fileName));
 }
 
-const version = readVersion();
 /** @type {Record<string, unknown>} */
 const manifest = {
   version,

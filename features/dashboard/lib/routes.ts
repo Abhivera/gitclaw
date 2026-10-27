@@ -1,5 +1,6 @@
 export const DASHBOARD_ROUTES = {
   overview: "/dashboard",
+  localReview: "/dashboard/local-review",
   setup: "/dashboard/setup",
   repos: "/dashboard/repos",
   pullRequest: "/dashboard/pull-request",
@@ -13,6 +14,11 @@ export type DashboardRoute =
   (typeof DASHBOARD_ROUTES)[keyof typeof DASHBOARD_ROUTES];
 
 export const DASHBOARD_NAV_ITEMS = [
+  {
+    title: "Local review",
+    href: DASHBOARD_ROUTES.localReview,
+    icon: "folder-git-2" as const,
+  },
   {
     title: "Overview",
     href: DASHBOARD_ROUTES.overview,

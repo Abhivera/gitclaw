@@ -46,10 +46,7 @@ function getInitialStep(status: DesktopSetupStatus): WizardStep {
   if (!status.ai.complete) {
     return "ai";
   }
-  if (!status.gitProvider.complete) {
-    return "git";
-  }
-  return "tunnel";
+  return "done";
 }
 
 function stepIndex(step: WizardStep): number {
@@ -148,7 +145,10 @@ export function DesktopSetupWizard({ status, onDismissWelcome }: DesktopSetupWiz
       }
 
       const keys = aiFields.map((field) => field.key);
-      const result = await config.saveConfig(pickValuesForKeys(config.values, keys));
+      const result = await config.saveConfig({
+        ...pickValuesForKeys(config.values, keys),
+        AI_PROVIDER: aiProvider === "ollama" ? "openai-compatible" : aiProvider,
+      });
       if (!result.success) {
         return;
       }
@@ -157,7 +157,7 @@ export function DesktopSetupWizard({ status, onDismissWelcome }: DesktopSetupWiz
       router.refresh();
       await new Promise((resolve) => setTimeout(resolve, 500));
       setApplying(false);
-      setCurrentStep("git");
+      setCurrentStep("done");
       return;
     }
 
@@ -240,31 +240,31 @@ export function DesktopSetupWizard({ status, onDismissWelcome }: DesktopSetupWiz
             className="mx-auto size-10 text-green-600 dark:text-green-400"
             weight="fill"
           />
-          <h2 className="mt-3 text-lg font-semibold">You&apos;re ready to connect repositories</h2>
+          <h2 className="mt-3 text-lg font-semibold">You&apos;re ready to review code</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            AI and git provider credentials are saved. Open Integrations to connect your
-            repositories.
-            {!status.webhooks.complete ? " Configure a tunnel later if you need webhooks." : null}
+            Your AI configuration is saved. Choose a local source folder to review now.
+            You can also configure a git provider and webhook tunnel for pull request reviews.
           </p>
         </div>
 
         <div className="flex flex-col items-center gap-3">
           <Button
             render={
-              <Link href={DASHBOARD_ROUTES.integrations} onClick={onDismissWelcome} />
+              <Link href={DASHBOARD_ROUTES.localReview} onClick={onDismissWelcome} />
             }
             nativeButton={false}
           >
-            Go to Integrations
+            Review a local folder
           </Button>
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            onClick={() => setCurrentStep("tunnel")}
+            onClick={() => setCurrentStep("git")}
           >
-            Review tunnel settings
+            Set up pull request reviews
           </Button>
+          {status.gitProvider.complete && <Link href={DASHBOARD_ROUTES.integrations} onClick={onDismissWelcome} className="text-sm underline">Connect repositories</Link>}
         </div>
       </div>
     );

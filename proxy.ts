@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { authorizeAdmin, hasAdminCredentials, isProtectedPath, isTrustedAdminOrigin } from "@/lib/admin-auth";
 import { DASHBOARD_ROUTES } from "@/features/dashboard/lib/routes";
 import {
   isDesktopApp,
@@ -12,6 +13,22 @@ const SETUP_PATHS = new Set<string>([
 ]);
 
 export function proxy(request: NextRequest) {
+  if (isProtectedPath(request.nextUrl.pathname)) {
+    if (!hasAdminCredentials()) {
+      return new NextResponse("Set GITCLAW_ADMIN_PASSWORD to at least 16 characters to enable administration.", {
+        status: 503, headers: { "Cache-Control": "no-store" },
+      });
+    }
+    if (!authorizeAdmin(request.headers)) {
+      return new NextResponse("Administrator authentication required", {
+        status: 401,
+        headers: { "WWW-Authenticate": 'Basic realm="GitClaw administration", charset="UTF-8"', "Cache-Control": "no-store" },
+      });
+    }
+    if (!isTrustedAdminOrigin(request)) {
+      return new NextResponse("Untrusted request origin", { status: 403 });
+    }
+  }
   if (!isDesktopApp() || isDesktopSetupComplete()) {
     return NextResponse.next();
   }
@@ -38,5 +55,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/dashboard", "/dashboard/:path*"],
+  matcher: ["/", "/dashboard/:path*", "/api/:path*"],
 };

@@ -1,14 +1,19 @@
+import { randomBytes } from "node:crypto";
 import { spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { createRequire } from "node:module";
 import { app } from "electron";
 import { ensureEnvFile, getEnvPath, loadEnvFile } from "./env.mjs";
 export const NEXT_PORT = 13100;
+export const desktopToken = randomBytes(32).toString("hex");
 const PG_PORT = 15432;
 
 /** @type {import('embedded-postgres').default | null} */
 let postgres = null;
+let pgControl = null;
+let postgresDataDir = null;
 /** @type {import('node:child_process').ChildProcess | null} */
 let nextProcess = null;
 /** @type {import('node:fs').FSWatcher | null} */
@@ -58,9 +63,15 @@ async function waitForServer(port, timeoutMs = 120_000) {
   const started = Date.now();
 
   while (Date.now() - started < timeoutMs) {
+    if (nextProcess && nextProcess.exitCode !== null) {
+      throw new Error(`GitClaw server exited before it was ready (code ${nextProcess.exitCode}).`);
+    }
     try {
-      const response = await fetch(`http://127.0.0.1:${port}`);
-      if (response.status < 500) {
+      const response = await fetch(`http://127.0.0.1:${port}/api/desktop/health`, {
+        headers: { "x-gitclaw-desktop-token": desktopToken },
+        signal: AbortSignal.timeout(2_000),
+      });
+      if (response.ok && (await response.json()).service === "gitclaw") {
         return;
       }
     } catch {
@@ -110,6 +121,7 @@ function buildRuntimeEnv(fileEnv) {
     ...process.env,
     ...fileEnv,
     GITCLAW_DESKTOP: "1",
+    GITCLAW_DESKTOP_TOKEN: desktopToken,
     GITCLAW_CONFIG_PATH: getEnvPath(),
     DATABASE_URL: `postgresql://postgres:postgres@127.0.0.1:${PG_PORT}/gitclaw`,
     APP_URL: `http://127.0.0.1:${NEXT_PORT}`,
@@ -230,8 +242,19 @@ export async function startGitClawServer() {
   ensureEnvFile({ port: NEXT_PORT, pgPort: PG_PORT });
   const fileEnv = loadEnvFile(getEnvPath());
 
-  const { default: EmbeddedPostgres } = await import("embedded-postgres");
+  // Child processes cannot execute binaries from inside app.asar. Load the
+  // complete database runtime from the unpacked dependency tree when installed.
+  const embeddedEntry = app.isPackaged
+    ? path.join(`${app.getAppPath()}.unpacked`, "node_modules", "embedded-postgres", "dist", "index.js")
+    : createRequire(import.meta.url).resolve("embedded-postgres");
+  const { default: EmbeddedPostgres } = await import(pathToFileURL(embeddedEntry).href);
+  // Electron's lifecycle already awaits stopGitClawServer. The library's Node
+  // `exit` hook cannot await cleanup and calls a missing callback on app.exit().
+  createRequire(embeddedEntry)("async-exit-hook").unhookEvent("exit");
+  const { default: getBinaries } = await import(pathToFileURL(path.join(path.dirname(embeddedEntry), "binary.js")).href);
+  pgControl = (await getBinaries()).pg_ctl;
   const dataDir = path.join(app.getPath("userData"), "postgres-data");
+  postgresDataDir = dataDir;
 
   postgres = new EmbeddedPostgres({
     databaseDir: dataDir,
@@ -239,6 +262,8 @@ export async function startGitClawServer() {
     password: "postgres",
     port: PG_PORT,
     persistent: true,
+    initdbFlags: ["--encoding=UTF8"],
+    postgresFlags: ["-h", "127.0.0.1"],
   });
 
   const pgVersionFile = path.join(dataDir, "PG_VERSION");
@@ -247,6 +272,15 @@ export async function startGitClawServer() {
   }
 
   await postgres.start();
+
+  const client = postgres.getPgClient("postgres", "127.0.0.1");
+  try {
+    await client.connect();
+    const exists = await client.query("SELECT 1 FROM pg_database WHERE datname = $1", ["gitclaw"]);
+    if (exists.rowCount === 0) await client.query('CREATE DATABASE "gitclaw"');
+  } finally {
+    await client.end();
+  }
 
   const runtimeEnv = buildRuntimeEnv(fileEnv);
   await runMigrations(standaloneDir, runtimeEnv);
@@ -260,8 +294,22 @@ export async function stopGitClawServer() {
   await stopNextServer();
 
   if (postgres) {
-    await postgres.stop();
+    const instance = postgres;
     postgres = null;
+    if (instance.process && pgControl && postgresDataDir) {
+      try {
+        // pg_ctl requests a clean checkpoint and shutdown on every OS, whereas
+        // embedded-postgres.stop() uses forced taskkill on Windows.
+        await runCommand(pgControl, ["stop", "-D", postgresDataDir, "-m", "fast", "-w", "-t", "10"], {
+          windowsHide: true, stdio: "pipe",
+        });
+        instance.process = undefined;
+      } catch {
+        await instance.stop();
+      }
+    } else {
+      await instance.stop();
+    }
   }
 }
 

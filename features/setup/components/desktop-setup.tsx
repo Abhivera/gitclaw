@@ -43,8 +43,8 @@ export function DesktopSetup({ status }: DesktopSetupProps) {
               {showWelcome ? "Set up your reviewer" : "Finish setup"}
             </h1>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              Add an AI provider and at least one git host. Save each step — GitClaw applies
-              changes automatically. Database and local URLs are managed for you.
+              Add an AI provider to review local source folders. Connecting a git host is
+              optional for pull request reviews. Database and local URLs are managed for you.
             </p>
           </div>
         </header>

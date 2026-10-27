@@ -28,7 +28,7 @@ export function isDesktopSetupComplete(): boolean {
     return true;
   }
 
-  return isAiProviderConfigured() && isGitProviderConfigured();
+  return isAiProviderConfigured();
 }
 
 export type DesktopSetupStatus = {

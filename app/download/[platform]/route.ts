@@ -12,6 +12,8 @@ const PLATFORM_ALIASES: Record<string, DownloadTarget> = {
   win: "windows",
   macos: "macos",
   mac: "macos",
+  "macos-arm64": "macos-arm64",
+  "macos-x64": "macos-x64",
   linux: "linux",
   appimage: "linux",
   deb: "deb",
@@ -26,6 +28,9 @@ export async function GET(_request: Request, { params }: RouteParams) {
   const key = PLATFORM_ALIASES[platform.toLowerCase()];
 
   if (!key) {
+    return NextResponse.redirect(new URL("/quickstart#install", getSiteUrl()));
+  }
+  if (key === "macos") {
     return NextResponse.redirect(new URL("/quickstart#install", getSiteUrl()));
   }
 

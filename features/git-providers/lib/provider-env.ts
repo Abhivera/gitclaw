@@ -28,6 +28,11 @@ export function isGitProviderConfigured(): boolean {
 }
 
 export function isAiProviderConfigured(): boolean {
+  const provider = getEnvValue("AI_PROVIDER")?.toLowerCase();
+  if (provider === "anthropic" || provider === "claude") return Boolean(getEnvValue("ANTHROPIC_API_KEY"));
+  if (provider === "groq") return Boolean(getEnvValue("GROQ_API_KEY"));
+  if (provider === "openrouter") return Boolean(getEnvValue("OPENROUTER_API_KEY"));
+  if (["openai", "openai-compatible", "ollama"].includes(provider ?? "")) return Boolean(getEnvValue("OPENAI_BASE_URL"));
   return Boolean(
     getEnvValue("OPENROUTER_API_KEY") ||
       getEnvValue("ANTHROPIC_API_KEY") ||

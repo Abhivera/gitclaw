@@ -74,6 +74,8 @@ export function buildRuntimeEnv({ fileEnv, envPath, databaseUrl, port, host }) {
     // Desktop mode enables the setup wizard and the dashboard configuration UI,
     // both of which read/write the .env file at GITCLAW_CONFIG_PATH.
     GITCLAW_DESKTOP: "1",
+    // CLI uses the configured password, never an inherited desktop token.
+    GITCLAW_DESKTOP_TOKEN: "",
     GITCLAW_CONFIG_PATH: envPath,
     APP_URL: fileEnv.APP_URL?.trim() || `http://localhost:${port}`,
     DATABASE_URL: databaseUrl,

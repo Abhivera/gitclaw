@@ -1,5 +1,5 @@
 export type PlatformKey = "windows" | "macos" | "linux";
-export type DownloadTarget = PlatformKey | "deb";
+export type DownloadTarget = PlatformKey | "deb" | "macos-arm64" | "macos-x64";
 
 export interface ReleaseDownloads {
   windows?: { name: string; url: string };
@@ -26,13 +26,8 @@ export function resolveMacDownload(
 ): { name: string; url: string } | undefined {
   if (!release) return undefined;
 
-  if (typeof navigator !== "undefined") {
-    const ua = navigator.userAgent.toLowerCase();
-    if (ua.includes("mac") && ua.includes("intel") && release.macosX64) {
-      return release.macosX64;
-    }
-  }
-
+  // Modern Apple Silicon browsers can also advertise "Intel" in their user agent.
+  // The download screen offers explicit architectures instead of guessing from it.
   return release.macosArm64 ?? release.macosX64 ?? release.macos;
 }
 
@@ -47,6 +42,10 @@ export function resolvePlatformDownload(
       return release.windows;
     case "macos":
       return resolveMacDownload(release);
+    case "macos-arm64":
+      return release.macosArm64;
+    case "macos-x64":
+      return release.macosX64;
     case "linux":
       return release.linuxAppImage ?? release.linuxDeb;
     case "deb":

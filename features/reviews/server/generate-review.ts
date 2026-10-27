@@ -1,3 +1,4 @@
+import { AI_TRUST_POLICY, prepareAiPrompt, safeAiOutput } from "@/features/ai/security";
 import { generateObject } from "ai";
 import { getReviewModel } from "@/features/ai";
 import {
@@ -15,6 +16,7 @@ Analyze the changes across these dimensions (only report what's relevant):
 
 - **Correctness** — Bugs, logic errors, off-by-one errors, incorrect assumptions
 - **Security** — Injection risks, auth issues, exposed secrets, unsafe deserialization
+- **AI application security** — Untrusted prompt/context injection, cross-user data leakage, unsafe model output execution, excessive tool permissions, secret disclosure, missing resource limits
 - **Performance** — Unnecessary loops, missing indexes, N+1 queries, memory leaks
 - **Reliability** — Unhandled errors/edge cases, missing null checks, race conditions
 - **Readability** — Naming clarity, overly complex logic
@@ -75,14 +77,18 @@ export async function generateReview(
   const { object, usage } = await generateObject({
     model: getReviewModel(),
     schema: structuredReviewSchema,
-    system: `${SYSTEM_PROMPT}\n\n${toneNote}${languageNote ? ` ${languageNote}` : ""}`,
-    prompt: `Repository: ${input.repoFullName}
+    system: `${AI_TRUST_POLICY}\n\n${SYSTEM_PROMPT}\n\n${toneNote}`,
+    abortSignal: AbortSignal.timeout(60_000),
+    maxRetries: 1,
+    maxOutputTokens: 8_000,
+    prompt: prepareAiPrompt(`Repository: ${input.repoFullName}
 Pull request title: ${input.title}
 ${scopeNote}
+${languageNote}
 
 ## Changed files (unified diff)
 
-${input.diff}${contextBlock}${staticBlock}`,
+${input.diff}${contextBlock}${staticBlock}`),
   });
 
   if (usage) {
@@ -94,5 +100,13 @@ ${input.diff}${contextBlock}${staticBlock}`,
     });
   }
 
-  return object;
+  return {
+    ...object,
+    summary: safeAiOutput(object.summary),
+    findings: object.findings.map((finding) => ({
+      ...finding,
+      body: safeAiOutput(finding.body),
+      ...(finding.suggestion ? { suggestion: safeAiOutput(finding.suggestion) } : {}),
+    })),
+  };
 }

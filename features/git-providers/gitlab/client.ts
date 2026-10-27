@@ -1,5 +1,4 @@
 import { env } from "@/lib/env";
-import { INSTANCE_USER_ID } from "@/lib/instance";
 
 function getGitlabBaseUrl() {
   return (env.GITLAB_BASE_URL ?? "https://gitlab.com").replace(/\/$/, "");
@@ -18,14 +17,14 @@ function gitlabCredentials() {
   return { clientId, clientSecret };
 }
 
-export function getGitlabOAuthUrl() {
+export function getGitlabOAuthUrl(state: string) {
   const { clientId } = gitlabCredentials();
   const params = new URLSearchParams({
     client_id: clientId,
     redirect_uri: `${env.APP_URL}/api/gitlab/callback`,
     response_type: "code",
     scope: "api read_api read_repository",
-    state: INSTANCE_USER_ID,
+    state,
   });
 
   return `${getGitlabBaseUrl()}/oauth/authorize?${params.toString()}`;

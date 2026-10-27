@@ -37,6 +37,7 @@
 - **Auto description** — Generates a PR body when empty on open
 - **Dashboard** — Overview, repos, PR list/detail, analytics, integrations, settings
 - **Desktop app** — Native Windows, macOS, and Linux builds with embedded PostgreSQL
+- **Local folder reviews** — Choose source files in the desktop app, preview the AI destination, and confirm each review; no Git installation or webhook required
 - **Teams** — Organizations, per-repo enable/disable, Slack notifications on review complete
 - **Background jobs** — Postgres-backed queue (pg-boss); no extra orchestrator required
 
@@ -73,7 +74,7 @@ flowchart LR
 
 ## Prerequisites
 
-- Node.js 20.9+ (manual install) or Docker
+- Node.js 20.19+, 22.12+, or 24+ (manual install) or Docker
 - [GitHub App](https://github.com/settings/apps) — repo access and PR comments (required for GitHub reviews)
 - An AI backend — OpenRouter key, Anthropic key, Groq key, or a local OpenAI-compatible server (Ollama)
 - GitLab and/or Bitbucket OAuth apps — only if using those providers
@@ -89,6 +90,11 @@ docker compose up --build
 ```
 
 Open [http://localhost:3000](http://localhost:3000) and go to **Dashboard → Integrations**.
+
+Set `GITCLAW_ADMIN_PASSWORD` in `.env` to a random password of at least 16 characters
+before opening the dashboard. Sign in with username `admin`. CLI installations
+use the same setting in their configuration file; Electron authenticates its
+local session automatically. See [security and AI data handling](docs/SECURITY.md).
 
 The compose stack runs Postgres + the app. Migrations apply automatically on container start.
 
@@ -200,11 +206,19 @@ Direct file URLs follow `https://gitclaw.online/downloads/<filename>` once publi
 ### First launch
 
 1. Install and open GitClaw.
-2. Go to **File → Open configuration folder** and edit `.env`.
-3. Add your GitHub App and AI provider keys.
-4. Restart the app — the dashboard opens automatically.
+2. Choose an AI provider and add its key, or configure a running local model server and its installed model name.
+3. Open **Local review**, choose a source folder, and inspect the file list and AI destination.
+4. Confirm that review to send the listed code to your selected provider and see line-level findings.
+
+Connecting GitHub, GitLab, or Bitbucket is optional for local reviews. Configure a
+git provider and webhook tunnel under **Integrations** for automatic PR reviews.
+No Node.js, Docker, Git or external database installation is needed for local reviews.
 
 The desktop app wires `DATABASE_URL` to a local Postgres instance stored in your user data folder.
+
+See [desktop builds, signing and release setup](docs/DESKTOP-RELEASE.md) for native
+architecture builds, fresh-install smoke tests and the signing credentials required
+before publishing Windows/macOS installers.
 
 ### Webhooks on desktop
 

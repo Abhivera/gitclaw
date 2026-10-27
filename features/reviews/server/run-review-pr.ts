@@ -175,7 +175,7 @@ export async function runReviewPullRequest({ pullRequestId }: PrReceivedJob) {
       adapter,
       connection,
       prRecord,
-      review,
+      { ...review, findings },
       findings,
       config
     );

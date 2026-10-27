@@ -1,3 +1,4 @@
+import { parseDiff } from "@/features/reviews/utils/parse-diff";
 import type { PrFile } from "@/features/reviews/types/review";
 import type { GitclawConfig } from "@/features/config/types/gitclaw-config";
 import type {
@@ -104,12 +105,6 @@ const GITLEAKS_PATTERNS: Array<{
   },
 ];
 
-function lineNumberInPatch(patch: string, matchIndex: number): number {
-  const before = patch.slice(0, matchIndex);
-  const addedLines = before.split("\n").filter((l) => l.startsWith("+")).length;
-  return Math.max(1, addedLines);
-}
-
 function scanPatch(
   file: PrFile,
   patterns: Array<{
@@ -130,11 +125,13 @@ function scanPatch(
     const globalPattern = pattern.global
       ? pattern
       : new RegExp(pattern.source, `${pattern.flags}g`);
-    for (const match of file.patch.matchAll(globalPattern)) {
+    for (const entry of parseDiff(file.patch).filter((entry) => entry.added)) {
+      if (!globalPattern.test(entry.text)) { globalPattern.lastIndex = 0; continue; }
+      globalPattern.lastIndex = 0;
       findings.push({
         tool,
         file: file.filePath,
-        line: lineNumberInPatch(file.patch, match.index ?? 0),
+        line: entry.line,
         severity,
         message,
       });
@@ -151,11 +148,13 @@ function scanGitleaks(file: PrFile): StaticAnalysisFinding[] {
     const globalPattern = pattern.global
       ? pattern
       : new RegExp(pattern.source, `${pattern.flags}g`);
-    for (const match of file.patch.matchAll(globalPattern)) {
+    for (const entry of parseDiff(file.patch).filter((entry) => entry.added)) {
+      if (!globalPattern.test(entry.text)) { globalPattern.lastIndex = 0; continue; }
+      globalPattern.lastIndex = 0;
       findings.push({
         tool: "gitleaks",
         file: file.filePath,
-        line: lineNumberInPatch(file.patch, match.index ?? 0),
+        line: entry.line,
         severity: "issue",
         message,
       });
@@ -173,7 +172,8 @@ function scanNpmAudit(files: PrFile[]): StaticAnalysisFinding[] {
     return findings;
   }
 
-  const addedDeps = pkgFile.patch.match(/^\+\s*"[^"]+"\s*:\s*"[^"]+"/gm);
+  const addedPatch = parseDiff(pkgFile.patch).filter((entry) => entry.added).map((entry) => `+${entry.text}`).join("\n");
+  const addedDeps = addedPatch.match(/^\+\s*"[^"]+"\s*:\s*"[^"]+"/gm);
   if (addedDeps && addedDeps.length > 0) {
     findings.push({
       tool: "npm_audit",
@@ -190,7 +190,7 @@ function scanNpmAudit(files: PrFile[]): StaticAnalysisFinding[] {
   ];
 
   for (const pattern of riskyPatterns) {
-    if (pattern.test(pkgFile.patch)) {
+    if (pattern.test(addedPatch)) {
       findings.push({
         tool: "npm_audit",
         file: pkgFile.filePath,
@@ -241,5 +241,5 @@ export function formatStaticAnalysisForPrompt(
       `- [${f.tool}] ${f.file}${f.line ? `:${f.line}` : ""} (${f.severity}): ${f.message}`
   );
 
-  return `## Static analysis results (automated)\n\nThe following issues were detected by automated tools. Include relevant ones in your findings and do not duplicate them unnecessarily.\n\n${lines.join("\n")}`;
+  return `## Static analysis results (built-in heuristics)\n\nThe following issues were detected by built-in pattern checks, not by external scanner execution. Include relevant ones in your findings and do not duplicate them unnecessarily.\n\n${lines.join("\n")}`;
 }

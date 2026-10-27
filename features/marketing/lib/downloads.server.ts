@@ -135,7 +135,7 @@ function pickMacosVariants(assets: GitHubAsset[]): {
   const dmgs = assets.filter((a) => a.name.toLowerCase().endsWith(".dmg"));
   return {
     arm64: dmgs.find((a) => /arm64/i.test(a.name)),
-    x64: dmgs.find((a) => /x64|intel/i.test(a.name)) ?? dmgs[0],
+    x64: dmgs.find((a) => /x64|intel/i.test(a.name)),
   };
 }
 

@@ -1,12 +1,17 @@
 import { app, BrowserWindow, Menu, Tray, dialog, shell, ipcMain } from "electron";
 import path from "node:path";
+import fs from "node:fs";
+import { createHash } from "node:crypto";
+import { collectLocalSources } from "./local-files.mjs";
 import { fileURLToPath } from "node:url";
 import { getConfigDir, getEnvPath } from "./env.mjs";
 import { isFirstRunComplete, markFirstRunComplete } from "./first-run.mjs";
 import { getAppIconPath, loadAppIcon, loadTrayIcon } from "./paths.mjs";
 import { CONFIGURATION_PATH } from "./routes.mjs";
+import { isExternalWebUrl, isLocalAppUrl, isTrustedDesktopSender } from "./security.mjs";
 import {
   NEXT_PORT,
+  desktopToken,
   restartNextServer,
   startGitClawServer,
   stopGitClawServer,
@@ -25,10 +30,22 @@ let tray = null;
 let serverInfo = null;
 let isQuitting = false;
 let isReloadingFromEnv = false;
+let localSelection = null;
+let localReviewRunning = false;
+const smokeTest = process.argv.includes("--gitclaw-smoke-test");
+if (smokeTest && process.env.GITCLAW_SMOKE_TEST_DATA_DIR) {
+  fs.mkdirSync(process.env.GITCLAW_SMOKE_TEST_DATA_DIR, { recursive: true });
+  app.setPath("userData", process.env.GITCLAW_SMOKE_TEST_DATA_DIR);
+  app.disableHardwareAcceleration();
+}
+
+const primaryInstance = app.requestSingleInstanceLock();
+if (!primaryInstance) app.quit();
+app.on("second-instance", showMainWindow);
 
 function restartApp() {
   app.relaunch();
-  app.exit(0);
+  app.quit();
 }
 
 function openConfigurationFile() {
@@ -40,9 +57,10 @@ function openConfigurationFolder() {
 }
 
 function showMainWindow() {
-  if (!mainWindow) {
+  if (!mainWindow || mainWindow.isDestroyed()) {
     return;
   }
+  if (mainWindow.isMinimized()) mainWindow.restore();
 
   if (!mainWindow.isVisible()) {
     mainWindow.show();
@@ -92,25 +110,77 @@ function buildConfigurationMenuItems({ includePageLink = true } = {}) {
 }
 
 function registerDesktopIpc() {
+  const trustedSender = (event) => isTrustedDesktopSender(
+    event, mainWindow?.webContents, serverInfo?.port ?? NEXT_PORT,
+  );
+  const requireTrustedSender = (event) => {
+    if (!trustedSender(event)) throw new Error("Untrusted desktop IPC sender");
+  };
+  ipcMain.handle("desktop:choose-review-folder", async (event) => {
+    requireTrustedSender(event);
+    if (localReviewRunning) throw new Error("Wait for the current review to finish.");
+    const picked = await dialog.showOpenDialog(mainWindow, { title: "Choose source folder to review", properties: ["openDirectory"] });
+    if (picked.canceled || !picked.filePaths[0]) return null;
+    const snapshot = await collectLocalSources(picked.filePaths[0]);
+    const id = createHash("sha256").update(JSON.stringify({ folderName: snapshot.folderName, files: snapshot.files })).digest("hex");
+    localSelection = { id, snapshot, expires: Date.now() + 10 * 60_000 };
+    return {
+      ...snapshot,
+      id,
+      files: snapshot.files.map(({ filePath, patch }) => ({ filePath, lines: patch.split("\n").length - 1 })),
+    };
+  });
+  ipcMain.handle("desktop:review-local-folder", async (event, confirmation) => {
+    requireTrustedSender(event);
+    if (localReviewRunning) throw new Error("A local review is already running.");
+    if (!localSelection || localSelection.expires < Date.now() ||
+        confirmation?.confirmed !== true || confirmation.snapshotId !== localSelection.id ||
+        typeof confirmation.destinationId !== "string") {
+      throw new Error("Choose a folder and confirm the files and AI destination first.");
+    }
+    const { id, snapshot } = localSelection;
+    localSelection = null; // Each confirmation authorizes only one request.
+    localReviewRunning = true;
+    try {
+      const origin = `http://127.0.0.1:${serverInfo?.port ?? NEXT_PORT}`;
+      const response = await fetch(`${origin}/api/desktop/local-review`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Origin: origin, "x-gitclaw-desktop-token": desktopToken },
+        body: JSON.stringify({ folderName: snapshot.folderName, files: snapshot.files,
+          consent: { confirmed: true, snapshotId: id, destinationId: confirmation.destinationId } }),
+        signal: AbortSignal.timeout(90_000),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Local review failed.");
+      return result;
+    } finally { localReviewRunning = false; }
+  });
   ipcMain.on("desktop:get-config-path", (event) => {
-    event.returnValue = getEnvPath();
+    event.returnValue = trustedSender(event) ? getEnvPath() : null;
   });
 
-  ipcMain.handle("desktop:get-first-run-complete", () => isFirstRunComplete());
+  ipcMain.handle("desktop:get-first-run-complete", (event) => {
+    requireTrustedSender(event);
+    return isFirstRunComplete();
+  });
 
-  ipcMain.handle("desktop:open-config-folder", async () => {
+  ipcMain.handle("desktop:open-config-folder", async (event) => {
+    requireTrustedSender(event);
     await shell.openPath(getConfigDir());
   });
 
-  ipcMain.handle("desktop:open-env-file", async () => {
+  ipcMain.handle("desktop:open-env-file", async (event) => {
+    requireTrustedSender(event);
     await shell.openPath(getEnvPath());
   });
 
-  ipcMain.handle("desktop:restart-app", () => {
+  ipcMain.handle("desktop:restart-app", (event) => {
+    requireTrustedSender(event);
     restartApp();
   });
 
-  ipcMain.handle("desktop:mark-first-run-complete", () => {
+  ipcMain.handle("desktop:mark-first-run-complete", (event) => {
+    requireTrustedSender(event);
     markFirstRunComplete();
   });
 }
@@ -208,7 +278,6 @@ function createTray() {
       {
         label: "Quit GitClaw",
         click: () => {
-          isQuitting = true;
           app.quit();
         },
       },
@@ -292,7 +361,7 @@ async function createSplashWindow() {
     frame: false,
     resizable: false,
     center: true,
-    show: true,
+    show: !smokeTest,
     backgroundColor: "#0a0a0a",
     icon: loadAppIcon() ?? undefined,
     webPreferences: {
@@ -316,27 +385,48 @@ async function createWindow() {
     autoHideMenuBar: process.platform !== "darwin",
     icon: loadAppIcon() ?? undefined,
     webPreferences: {
-      preload: path.join(__dirname, "preload.mjs"),
+      preload: path.join(__dirname, "preload.cjs"),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: false,
+      sandbox: true,
     },
   });
 
   mainWindow.on("ready-to-show", () => {
-    mainWindow?.show();
+    if (!smokeTest) mainWindow?.show();
+  });
+  mainWindow.on("closed", () => { mainWindow = null; localSelection = null; });
+
+  mainWindow.webContents.session.webRequest.onBeforeSendHeaders((details, callback) => {
+    if (isLocalAppUrl(details.url, port)) {
+      details.requestHeaders["x-gitclaw-desktop-token"] = desktopToken;
+    } else {
+      for (const key of Object.keys(details.requestHeaders)) {
+        if (key.toLowerCase() === "x-gitclaw-desktop-token") delete details.requestHeaders[key];
+      }
+    }
+    callback({ requestHeaders: details.requestHeaders });
   });
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    if (url.startsWith("http://127.0.0.1") || url.startsWith("http://localhost")) {
+    if (isLocalAppUrl(url, port)) {
       return { action: "allow" };
     }
 
-    shell.openExternal(url);
+    if (isExternalWebUrl(url)) void shell.openExternal(url);
     return { action: "deny" };
   });
 
-  await mainWindow.loadURL(`http://127.0.0.1:${port}`);
+  mainWindow.webContents.on("did-create-window", (child) => {
+    child.webContents.on("did-navigate", (_event, url) => {
+      if (isLocalAppUrl(url, port) && new URL(url).pathname === "/dashboard/integrations") {
+        void mainWindow?.loadURL(`http://127.0.0.1:${port}/dashboard/integrations`);
+        child.close();
+      }
+    });
+  });
+
+  await mainWindow.loadURL(`http://127.0.0.1:${port}/dashboard/local-review`);
 }
 
 async function bootstrap() {
@@ -353,15 +443,29 @@ async function bootstrap() {
     splashWindow?.close();
     splashWindow = null;
     await createWindow();
+    if (smokeTest) {
+      const bridgeReady = await mainWindow.webContents.executeJavaScript(
+        "Boolean(window.gitclawDesktop && window.gitclawDesktop.configPath && typeof window.gitclawDesktop.restartApp === 'function')",
+      );
+      if (!bridgeReady) throw new Error("Desktop preload did not initialize");
+      console.log("[desktop-smoke] PASS: database, migrations, server and sandboxed preload");
+      app.quit();
+    }
   } catch (error) {
     splashWindow?.close();
     splashWindow = null;
     const message = error instanceof Error ? error.message : String(error);
+    if (smokeTest) {
+      console.error(`[desktop-smoke] FAIL: ${message}`);
+      await stopGitClawServer();
+      app.exit(1);
+      return;
+    }
     await showStartupError(message);
   }
 }
 
-app.whenReady().then(bootstrap);
+if (primaryInstance) app.whenReady().then(bootstrap);
 
 app.on("before-quit", async (event) => {
   if (isQuitting) {

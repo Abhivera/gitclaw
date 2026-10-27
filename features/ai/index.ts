@@ -3,6 +3,8 @@ import type { LanguageModel } from "ai";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { env } from "@/lib/env";
+import { createHash } from "node:crypto";
+import type { AiReviewDestination } from "@/features/local-reviews/types";
 
 /**
  * GitClaw supports four AI backends (set `AI_PROVIDER` or let it auto-detect):
@@ -71,6 +73,24 @@ function resolveModelId(provider: AIProvider): string {
 }
 
 let cachedModel: LanguageModel | null = null;
+
+export function getAiReviewDestination(): AiReviewDestination {
+  const provider = resolveProvider();
+  const model = resolveModelId(provider);
+  const rawEndpoint = provider === "anthropic" ? "https://api.anthropic.com/v1"
+    : provider === "groq" ? GROQ_BASE_URL
+    : provider === "openrouter" ? "https://openrouter.ai/api/v1" : env.OPENAI_BASE_URL;
+  if (!rawEndpoint) throw new Error("Configure the AI endpoint first");
+  const url = new URL(rawEndpoint);
+  url.username = "";
+  url.password = "";
+  url.search = "";
+  url.hash = "";
+  return {
+    id: createHash("sha256").update(JSON.stringify({ provider, model, rawEndpoint })).digest("hex"),
+    provider, model, endpoint: url.toString(),
+  };
+}
 
 export function getReviewModel(): LanguageModel {
   if (cachedModel) {

@@ -1,5 +1,7 @@
 "use server";
 
+import { requireAdmin } from "@/lib/require-admin";
+
 import { enqueue, QUEUES } from "@/features/jobs/queue";
 import { getOrgConnectionIds } from "@/features/organizations/server/org";
 import { prisma } from "@/lib/db";
@@ -8,6 +10,7 @@ import { DASHBOARD_ROUTES } from "../lib/routes";
 import { toggleRepositoryEnabled } from "../server/queries";
 
 export async function toggleRepoEnabled(formData: FormData) {
+  await requireAdmin();
   const repositoryId = formData.get("repositoryId");
   const enabled = formData.get("enabled") === "true";
 
@@ -20,6 +23,7 @@ export async function toggleRepoEnabled(formData: FormData) {
 }
 
 export async function rerunReview(formData: FormData) {
+  await requireAdmin();
   const pullRequestId = formData.get("pullRequestId");
 
   if (typeof pullRequestId !== "string") {

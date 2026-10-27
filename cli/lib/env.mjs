@@ -10,6 +10,9 @@ APP_URL=http://localhost:{port}
 # Leave empty when starting with \`gitclaw start --embedded-db\`.
 DATABASE_URL=
 
+# Required for dashboard/configuration access (username: admin, minimum 16 characters).
+GITCLAW_ADMIN_PASSWORD=
+
 GITHUB_APP_ID=
 GITHUB_APP_PRIVATE_KEY=
 GITHUB_WEBHOOK_SECRET=

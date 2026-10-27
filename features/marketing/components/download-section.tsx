@@ -9,7 +9,6 @@ import { DownloadCard } from "@/features/marketing/components/download-card";
 import { WindowsIcon } from "@/features/marketing/components/windows-icon";
 import {
   detectPlatform,
-  resolveMacDownload,
   type PlatformKey,
   type ReleaseDownloads,
 } from "@/features/marketing/lib/downloads";
@@ -37,7 +36,6 @@ export function DownloadSection({ initialRelease }: DownloadSectionProps) {
     getClientPlatform,
     getServerPlatform,
   );
-  const macDownload = resolveMacDownload(initialRelease);
 
   function suggested(p: PlatformKey): boolean {
     return platform === p;
@@ -84,12 +82,20 @@ export function DownloadSection({ initialRelease }: DownloadSectionProps) {
           highlight={suggested("windows")}
         />
         <DownloadCard
-          title="macOS"
-          description="Disk image (.dmg). Open and drag GitClaw into Applications."
-          href={macDownload?.url ?? `${URLS.download}/macos`}
-          fileLabel={macDownload?.name}
+          title="macOS · Apple Silicon"
+          description="For M-series Macs. Open the .dmg and drag GitClaw into Applications."
+          href={initialRelease?.macosArm64?.url ?? `${URLS.download}/macos-arm64`}
+          fileLabel={initialRelease?.macosArm64?.name}
           icon={AppleLogoIcon}
           highlight={suggested("macos")}
+        />
+        <DownloadCard
+          title="macOS · Intel"
+          description="For Intel Macs. Open the .dmg and drag GitClaw into Applications."
+          href={initialRelease?.macosX64?.url ?? `${URLS.download}/macos-x64`}
+          fileLabel={initialRelease?.macosX64?.name}
+          icon={AppleLogoIcon}
+          highlight={false}
         />
         <DownloadCard
           title="Linux (AppImage)"

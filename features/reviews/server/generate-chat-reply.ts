@@ -1,3 +1,4 @@
+import { AI_TRUST_POLICY, prepareAiPrompt, safeAiOutput } from "@/features/ai/security";
 import { generateText } from "ai";
 import { getReviewModel } from "@/features/ai";
 import type { ReviewFinding } from "../types/review-finding";
@@ -40,13 +41,16 @@ export async function generateChatReply(input: ChatInput): Promise<string> {
 
   const { text, usage } = await generateText({
     model: getReviewModel(),
-    system: SYSTEM_PROMPT,
-    prompt: `Repository: ${input.repoFullName}
+    system: `${AI_TRUST_POLICY}\n\n${SYSTEM_PROMPT}`,
+    abortSignal: AbortSignal.timeout(60_000),
+    maxRetries: 1,
+    maxOutputTokens: 8_000,
+    prompt: prepareAiPrompt(`Repository: ${input.repoFullName}
 PR #${input.prNumber}: ${input.prTitle}
 ${summaryBlock}${findingsBlock}
 
 ## User message
-${input.userMessage.replace(/@gitclaw\b/gi, "").trim()}`,
+${input.userMessage.replace(/@gitclaw\b/gi, "").trim()}`),
   });
 
   if (usage) {
@@ -57,5 +61,5 @@ ${input.userMessage.replace(/@gitclaw\b/gi, "").trim()}`,
     });
   }
 
-  return text;
+  return safeAiOutput(text);
 }

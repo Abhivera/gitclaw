@@ -19,7 +19,9 @@ Or fully self-contained (downloads a bundled PostgreSQL on first use):
 npx gitclaw-cli start --embedded-db
 ```
 
-Then open [http://localhost:3000](http://localhost:3000) and finish setup from the dashboard.
+Set `GITCLAW_ADMIN_PASSWORD` in `~/.gitclaw/.env` to a random password of at least
+16 characters, then restart. Open [http://localhost:3000](http://localhost:3000),
+sign in with username `admin` and that password, and finish setup from the dashboard.
 
 You can also install globally: `npm install -g gitclaw-cli`, then use the `gitclaw` command.
 

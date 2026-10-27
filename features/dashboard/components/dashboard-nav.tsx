@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSyncExternalStore } from "react";
 import {
   LayoutIcon,
   GitBranch,
@@ -33,6 +34,10 @@ const NAV_ICONS = {
   settings: Gear,
 } as const;
 
+const subscribeToDesktop = () => () => {};
+const desktopSnapshot = () => Boolean(window.gitclawDesktop);
+const desktopServerSnapshot = () => false;
+
 function isNavActive(pathname: string, href: DashboardRoute) {
   if (href === "/dashboard") {
     return pathname === href;
@@ -42,13 +47,14 @@ function isNavActive(pathname: string, href: DashboardRoute) {
 
 export function DashboardNav() {
   const pathname = usePathname();
+  const desktop = useSyncExternalStore(subscribeToDesktop, desktopSnapshot, desktopServerSnapshot);
 
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Workspace</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
-          {DASHBOARD_NAV_ITEMS.map((item) => {
+          {DASHBOARD_NAV_ITEMS.filter((item) => item.href !== "/dashboard/local-review" || desktop).map((item) => {
             const Icon = NAV_ICONS[item.icon];
             const active = isNavActive(pathname, item.href);
 

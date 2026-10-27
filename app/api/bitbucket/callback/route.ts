@@ -1,5 +1,5 @@
 import { DASHBOARD_ROUTES } from "@/features/dashboard/lib/routes";
-import { validateOAuthState } from "@/features/git-providers/lib/provider-config";
+import { validateOAuthState } from "@/features/git-providers/server/oauth-state";
 import { saveOAuthConnection } from "@/features/git-providers/server/connections";
 import {
   exchangeBitbucketCode,
@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     redirect(DASHBOARD_ROUTES.integrations);
   }
 
-  if (!validateOAuthState(searchParams.get("state"))) {
+  if (!(await validateOAuthState("bitbucket", searchParams.get("state")))) {
     redirect(DASHBOARD_ROUTES.integrations);
   }
 

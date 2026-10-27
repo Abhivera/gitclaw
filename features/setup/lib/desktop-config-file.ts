@@ -79,6 +79,7 @@ export function saveDesktopConfigFile(
   }
 
   fs.writeFileSync(configPath, nextContent, "utf8");
+  if (process.platform !== "win32") fs.chmodSync(configPath, 0o600);
   return { success: true };
 }
 

@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: release-desktop-${{ github.ref }}
@@ -15,19 +15,34 @@ concurrency:
 
 jobs:
   build:
-    name: ${{ matrix.os }}
+    name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: windows-latest
-          - os: macos-latest
-          - os: ubuntu-latest
+            name: windows-x64
+            arch: x64
+            platform: win
+          - os: macos-15-intel
+            name: macos-x64
+            arch: x64
+            platform: mac
+          - os: macos-15
+            name: macos-arm64
+            arch: arm64
+            platform: mac
+          - os: ubuntu-24.04
+            name: linux-x64
+            arch: x64
+            platform: linux
 
     env:
       APP_URL: http://127.0.0.1:13100
       DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:15432/gitclaw
+      GITCLAW_TARGET_ARCH: ${{ matrix.arch }}
+      GITCLAW_REQUIRE_SIGNING: ${{ startsWith(github.ref, 'refs/tags/') && '1' || '0' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -41,10 +56,16 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libfuse2
+          sudo apt-get install -y libfuse2t64 xvfb
 
       - name: Install root dependencies
         run: npm ci
+
+      - name: Verify release versions
+        run: node desktop/scripts/check-release.mjs
+
+      - name: Validate application
+        run: npm test
 
       - name: Build standalone Next.js bundle
         run: npm run desktop:build:next
@@ -54,12 +75,32 @@ jobs:
 
       - name: Package desktop app
         run: npm run dist --prefix desktop
+        env:
+          CSC_LINK: ${{ matrix.platform == 'mac' && secrets.MAC_CSC_LINK || matrix.platform == 'win' && secrets.WIN_CSC_LINK || '' }}
+          CSC_KEY_PASSWORD: ${{ matrix.platform == 'mac' && secrets.MAC_CSC_KEY_PASSWORD || matrix.platform == 'win' && secrets.WIN_CSC_KEY_PASSWORD || '' }}
+          APPLE_ID: ${{ matrix.platform == 'mac' && secrets.APPLE_ID || '' }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ matrix.platform == 'mac' && secrets.APPLE_APP_SPECIFIC_PASSWORD || '' }}
+          APPLE_TEAM_ID: ${{ matrix.platform == 'mac' && secrets.APPLE_TEAM_ID || '' }}
+
+      - name: Smoke-test installed runtime
+        if: runner.os != 'Linux'
+        run: node desktop/scripts/smoke-desktop.mjs
+
+      - name: Smoke-test installed runtime on Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get install -y ./release/desktop/*.deb
+          xvfb-run -a node desktop/scripts/smoke-desktop.mjs /opt/GitClaw/gitclaw
 
       - name: Upload installer artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: desktop-${{ matrix.os }}
-          path: release/desktop/*
+          name: desktop-${{ matrix.name }}
+          path: |
+            release/desktop/*.exe
+            release/desktop/*.dmg
+            release/desktop/*.AppImage
+            release/desktop/*.deb
           if-no-files-found: error
 
   prepare-downloads:
@@ -68,6 +109,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
 
       - uses: actions/download-artifact@v4
         with:
@@ -84,6 +129,11 @@ jobs:
       - name: Build downloads manifest
         run: node desktop/scripts/prepare-website-downloads.mjs
 
+      - name: Write checksums
+        run: |
+          cd public/downloads
+          sha256sum *.exe *.dmg *.AppImage *.deb > SHA256SUMS.txt
+
       - name: Upload website downloads
         uses: actions/upload-artifact@v4
         with:
@@ -96,6 +146,8 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     needs: [build, prepare-downloads]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -107,5 +159,6 @@ jobs:
         with:
           generate_release_notes: true
           files: artifacts/**/*
+          fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

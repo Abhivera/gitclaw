@@ -1,6 +1,6 @@
 import { DASHBOARD_ROUTES } from "@/features/dashboard/lib/routes";
 import { saveInstallation } from "@/features/git-providers/github/installation";
-import { validateOAuthState } from "@/features/git-providers/lib/provider-config";
+import { validateOAuthState } from "@/features/git-providers/server/oauth-state";
 import { ensureInstance } from "@/lib/instance";
 import { redirect } from "next/navigation";
 
@@ -10,7 +10,7 @@ export async function GET(request: Request) {
   const installationId = searchParams.get("installation_id");
   await ensureInstance();
 
-  if (!validateOAuthState(searchParams.get("state"))) {
+  if (!(await validateOAuthState("github", searchParams.get("state")))) {
     redirect(DASHBOARD_ROUTES.integrations);
   }
 

@@ -1,5 +1,4 @@
 import { env } from "@/lib/env";
-import { INSTANCE_USER_ID } from "@/lib/instance";
 
 const BITBUCKET_API = "https://api.bitbucket.org/2.0";
 
@@ -14,13 +13,13 @@ function bitbucketCredentials() {
   return { clientId, clientSecret };
 }
 
-export function getBitbucketOAuthUrl() {
+export function getBitbucketOAuthUrl(state: string) {
   const { clientId } = bitbucketCredentials();
   const redirectUri = `${env.APP_URL}/api/bitbucket/callback`;
   const params = new URLSearchParams({
     client_id: clientId,
     response_type: "code",
-    state: INSTANCE_USER_ID,
+    state,
     redirect_uri: redirectUri,
   });
 

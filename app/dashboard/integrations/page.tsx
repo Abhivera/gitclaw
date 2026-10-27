@@ -7,9 +7,6 @@ import {
 } from "@/features/git-providers/components/provider-icons";
 import { GIT_PROVIDER_LABELS } from "@/features/git-providers/constants";
 import { getConnectionStatus } from "@/features/git-providers/server/connections";
-import { getGithubInstallUrl } from "@/features/git-providers/github/adapter";
-import { getGitlabOAuthUrl } from "@/features/git-providers/gitlab/client";
-import { getBitbucketOAuthUrl } from "@/features/git-providers/bitbucket/client";
 import { getProviderSetup } from "@/features/git-providers/lib/provider-config";
 import { DesktopWebhooksBanner } from "@/features/setup/components/desktop-webhooks-banner";
 import { isDesktopApp } from "@/features/setup/lib/desktop-setup";
@@ -50,7 +47,7 @@ const IntegrationsPage = async () => {
           icon={<GithubIcon className="size-5" />}
           configured={githubSetup.configured}
           setupHint={githubSetup.setupHint}
-          installUrl={githubSetup.configured ? getGithubInstallUrl() : null}
+          installUrl={githubSetup.configured ? "/api/github/connect" : null}
           connection={github}
           isDesktop={isDesktop}
           publicWebhookUrl={
@@ -69,7 +66,7 @@ const IntegrationsPage = async () => {
           icon={<GitlabIcon className="size-5" />}
           configured={gitlabSetup.configured}
           setupHint={gitlabSetup.setupHint}
-          installUrl={gitlabSetup.configured ? getGitlabOAuthUrl() : null}
+          installUrl={gitlabSetup.configured ? "/api/gitlab/connect" : null}
           connection={gitlab}
           isDesktop={isDesktop}
           setupSteps={[
@@ -85,7 +82,7 @@ const IntegrationsPage = async () => {
           icon={<BitbucketIcon className="size-5" />}
           configured={bitbucketSetup.configured}
           setupHint={bitbucketSetup.setupHint}
-          installUrl={bitbucketSetup.configured ? getBitbucketOAuthUrl() : null}
+          installUrl={bitbucketSetup.configured ? "/api/bitbucket/connect" : null}
           connection={bitbucket}
           isDesktop={isDesktop}
           setupSteps={[

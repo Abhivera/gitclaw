@@ -49,8 +49,8 @@ export const AI_PROVIDER_CARDS: Array<{
   },
   {
     id: "ollama",
-    label: "Ollama / local",
-    description: "OpenAI-compatible endpoint on your machine.",
+    label: "OpenAI-compatible / local",
+    description: "An OpenAI-compatible cloud endpoint or local Ollama server.",
   },
 ];
 
@@ -271,7 +271,12 @@ export const AI_PROVIDER_OPTIONS = [
 ] as const;
 
 export function getFieldsForAiProvider(provider: AiProviderId): FieldConfig[] {
-  return AI_FIELDS_BY_PROVIDER[provider];
+  return [...AI_FIELDS_BY_PROVIDER[provider], {
+    key: "GITCLAW_REVIEW_MODEL",
+    label: provider === "ollama" ? "Model name" : "Review model (optional)",
+    description: provider === "ollama" ? "Use the exact model ID available at your chosen endpoint." : "Leave blank to use the provider default.",
+    placeholder: provider === "ollama" ? "e.g. qwen2.5-coder:7b" : "Provider model ID",
+  }];
 }
 
 export function getFieldsForGitProvider(provider: GitProviderId): FieldConfig[] {
@@ -371,6 +376,7 @@ export function validateAiStep(
     if (field.key === "OPENAI_API_KEY") {
       continue;
     }
+    if (field.key === "GITCLAW_REVIEW_MODEL" && provider !== "ollama") continue;
 
     if (!hasValue) {
       issues[field.key] = "This field is required.";

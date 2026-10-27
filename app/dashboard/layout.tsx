@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/lib/require-admin";
 import { ensureInstance } from "@/lib/instance";
 import { DashboardLayoutClient } from "@/features/dashboard/components/dashboard-layout-client";
 import { SetupRequired } from "@/features/setup/components/setup-required";
@@ -10,6 +11,8 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  await requireAdmin();
+
   if (!isCoreEnvConfigured()) {
     return (
       <div className="flex min-h-svh items-center justify-center bg-muted/40 p-6">

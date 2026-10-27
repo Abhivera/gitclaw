@@ -1,5 +1,7 @@
 import type { PrFile } from "../types/review";
 import type { ReviewFinding, StructuredReview } from "../types/review-finding";
+import { parseDiff } from "../utils/parse-diff";
+import { safeAiOutput } from "@/features/ai/security";
 
 export function formatFindingBody(finding: ReviewFinding): string {
   const icon = finding.severity === "issue" ? "🚨" : "💡";
@@ -41,11 +43,24 @@ export function formatReviewSummary(review: StructuredReview): string {
   return lines.join("\n");
 }
 
-/** Keep only findings that reference files present in the diff. */
+/** Validate locations and content before either storage or publication. */
 export function filterFindingsToDiff(
   findings: ReviewFinding[],
   files: PrFile[]
 ): ReviewFinding[] {
-  const filePaths = new Set(files.map((file) => file.filePath));
-  return findings.filter((finding) => filePaths.has(finding.file));
+  const locations = new Map(files.map((file) => [file.filePath,
+    new Set(parseDiff(file.patch).map((entry) => entry.line))]));
+  const seen = new Set<string>();
+  return findings.filter((finding) => {
+    if (!Number.isSafeInteger(finding.line) || !locations.get(finding.file)?.has(finding.line) ||
+        !finding.body.trim() || finding.body.length > 8_000 ||
+        (finding.suggestion?.length ?? 0) > 8_000) return false;
+    const key = `${finding.file}:${finding.line}:${finding.body}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).slice(0, 100).map((finding) => ({ ...finding,
+    body: safeAiOutput(finding.body),
+    ...(finding.suggestion ? { suggestion: safeAiOutput(finding.suggestion) } : {}),
+  }));
 }

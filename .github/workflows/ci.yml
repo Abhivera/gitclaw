@@ -1,5 +1,8 @@
 name: CI
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [main]
@@ -11,6 +14,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  dependency-security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm audit --package-lock-only --audit-level=high
+      - run: npm audit --prefix cli --package-lock-only --audit-level=high
+      - run: npm audit --prefix desktop --package-lock-only --audit-level=high
+
   lint-typecheck-build:
     runs-on: ubuntu-latest
     env:
@@ -43,5 +57,7 @@ jobs:
       - run: npm run lint
 
       - run: npm run typecheck
+
+      - run: npm test
 
       - run: npm run build

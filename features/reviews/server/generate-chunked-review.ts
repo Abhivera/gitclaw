@@ -5,6 +5,7 @@ import { formatPrFilesForReview } from "./pr-files";
 import { generateReview } from "./generate-review";
 
 const MAX_SINGLE_REVIEW_CHARS = 48_000;
+const MAX_REVIEW_CHUNKS = 32;
 
 type ChunkedReviewInput = {
   repoFullName: string;
@@ -52,6 +53,9 @@ export async function generateChunkedReview(
   }
 
   const chunks = chunkPrFiles(input.prNumber, input.files);
+  if (chunks.length > MAX_REVIEW_CHUNKS) {
+    throw new Error("Review exceeds the 32 chunk budget; narrow the review scope");
+  }
   const allFindings: StructuredReview["findings"] = [];
   let summary = "";
 

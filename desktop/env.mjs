@@ -37,7 +37,7 @@ export function getEnvPath() {
 
 export function ensureEnvFile({ port, pgPort }) {
   const configDir = getConfigDir();
-  fs.mkdirSync(configDir, { recursive: true });
+  fs.mkdirSync(configDir, { recursive: true, mode: 0o700 });
 
   const envPath = getEnvPath();
   const databaseUrl = `postgresql://postgres:postgres@127.0.0.1:${pgPort}/gitclaw`;
@@ -46,7 +46,7 @@ export function ensureEnvFile({ port, pgPort }) {
   if (!fs.existsSync(envPath)) {
     const content = ENV_TEMPLATE.replaceAll("{port}", String(port))
       .replaceAll("{pgPort}", String(pgPort));
-    fs.writeFileSync(envPath, content, "utf8");
+    fs.writeFileSync(envPath, content, { encoding: "utf8", mode: 0o600 });
     return envPath;
   }
 
@@ -54,6 +54,7 @@ export function ensureEnvFile({ port, pgPort }) {
   content = upsertEnvValue(content, "DATABASE_URL", databaseUrl);
   content = upsertEnvValue(content, "APP_URL", appUrl);
   fs.writeFileSync(envPath, content, "utf8");
+  if (process.platform !== "win32") fs.chmodSync(envPath, 0o600);
 
   return envPath;
 }

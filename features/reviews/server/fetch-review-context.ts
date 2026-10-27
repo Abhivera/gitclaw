@@ -3,6 +3,7 @@ import type { PrFile } from "@/features/reviews/types/review";
 import type { GitclawConfig } from "@/features/config/types/gitclaw-config";
 import { getProviderAdapter } from "@/features/git-providers/server/get-adapter";
 import type { GitProvider } from "@/lib/generated/prisma/client";
+import { isSensitiveFile } from "@/features/ai/security";
 
 const IMPORT_PATTERNS = [
   /import\s+[^'"]*['"]([^'"]+)['"]/g,
@@ -36,11 +37,9 @@ function extractLocalImports(patch: string, filePath: string): string[] {
 }
 
 function resolveRelativeImport(dir: string, specifier: string): string | null {
-  if (specifier.startsWith("@/")) {
-    return `src/${specifier.slice(2)}`;
-  }
-
-  const parts = [...(dir ? dir.split("/") : []), ...specifier.split("/")];
+  const parts = specifier.startsWith("@/")
+    ? specifier.slice(2).split("/")
+    : [...(dir ? dir.split("/") : []), ...specifier.split("/")];
   const resolved: string[] = [];
 
   for (const part of parts) {
@@ -48,6 +47,7 @@ function resolveRelativeImport(dir: string, specifier: string): string | null {
       continue;
     }
     if (part === "..") {
+      if (resolved.length === 0) return null;
       resolved.pop();
       continue;
     }
@@ -55,7 +55,7 @@ function resolveRelativeImport(dir: string, specifier: string): string | null {
   }
 
   const path = resolved.join("/");
-  if (!path.includes(".")) {
+  if (!resolved[resolved.length - 1]?.includes(".")) {
     return `${path}.ts`;
   }
   return path;
@@ -87,6 +87,7 @@ export async function fetchReviewContext(input: ContextInput): Promise<string> {
   ];
 
   for (const filePath of pathsToFetch) {
+    if (isSensitiveFile(filePath)) continue;
     const content = await adapter.fetchFileContent(
       input.connection,
       input.repoFullName,
