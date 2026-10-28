@@ -31,6 +31,9 @@ type DownloadSectionProps = {
 };
 
 export function DownloadSection({ initialRelease }: DownloadSectionProps) {
+  const shellPath = (name: string) => `'./${name.replace(/'/g, "'\\''")}'`;
+  const debPath = shellPath(initialRelease?.linuxDeb?.name ?? "GitClaw-VERSION-amd64.deb");
+  const appImagePath = shellPath(initialRelease?.linuxAppImage?.name ?? "GitClaw-VERSION-x86_64.AppImage");
   const platform = useSyncExternalStore(
     subscribeToPlatform,
     getClientPlatform,
@@ -155,13 +158,14 @@ export function DownloadSection({ initialRelease }: DownloadSectionProps) {
               Linux installation commands
             </summary>
             <p className="mt-3 leading-relaxed">
-              In the folder containing your download, replace VERSION with the
-              version in the downloaded filename.
+              Run these commands in the folder containing your download.
+              {(!initialRelease?.linuxDeb || !initialRelease?.linuxAppImage) &&
+                " Replace VERSION with the version in the downloaded filename."}
             </p>
             <p className="mt-3 font-medium">Debian / Ubuntu (recommended)</p>
-            <pre className="mt-2 overflow-x-auto rounded-lg bg-black/30 p-3 text-xs"><code>{"sudo apt install ./GitClaw-VERSION-x64.deb"}</code></pre>
+            <pre className="mt-2 overflow-x-auto rounded-lg bg-black/30 p-3 text-xs"><code>{`sudo apt install ${debPath}`}</code></pre>
             <p className="mt-3 font-medium">AppImage</p>
-            <pre className="mt-2 overflow-x-auto rounded-lg bg-black/30 p-3 text-xs"><code>{"chmod +x ./GitClaw-VERSION-x64.AppImage\n./GitClaw-VERSION-x64.AppImage"}</code></pre>
+            <pre className="mt-2 overflow-x-auto rounded-lg bg-black/30 p-3 text-xs"><code>{`chmod +x ${appImagePath}\n${appImagePath}`}</code></pre>
             <p className="mt-3 leading-relaxed">
               If AppImage reports a missing FUSE library, install FUSE 2 using
               your distribution’s package manager, or use the .deb on Debian / Ubuntu.

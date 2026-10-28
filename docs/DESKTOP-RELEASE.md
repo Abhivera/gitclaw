@@ -7,7 +7,7 @@
 | Windows | x64 | `GitClaw-Setup-VERSION.exe` |
 | macOS | Apple Silicon / arm64 | `GitClaw-VERSION-arm64.dmg` |
 | macOS | Intel / x64 | `GitClaw-VERSION-x64.dmg` |
-| Linux | x64 | `GitClaw-VERSION-x64.AppImage` or `.deb` |
+| Linux | x64 | `GitClaw-VERSION-x86_64.AppImage` or `GitClaw-VERSION-amd64.deb` |
 
 The app contains Electron, its web server, migration engine and PostgreSQL. Users
 do not install Node.js, npm, Docker or PostgreSQL. Application data stays in the

@@ -153,6 +153,8 @@ test("every frontend installer link redirects to its exact published asset", asy
   }
   assert.ok(html.includes("Your first review"));
   assert.ok(html.includes("Linux installation commands"));
+  assert.ok(html.includes("sudo apt install &#x27;./app.deb&#x27;"));
+  assert.ok(html.includes("chmod +x &#x27;./app.AppImage&#x27;"));
 });
 
 test("unavailable builds have no download links and direct requests have a valid fallback", async () => {
