@@ -5,7 +5,6 @@ import {
 } from "@/features/marketing/lib/downloads";
 import { fetchLatestDownloads } from "@/features/marketing/lib/downloads.server";
 import { URLS } from "@/features/marketing/lib/releases";
-import { getSiteUrl } from "@/lib/site-url";
 
 const PLATFORM_ALIASES: Record<string, DownloadTarget> = {
   windows: "windows",
@@ -15,7 +14,7 @@ const PLATFORM_ALIASES: Record<string, DownloadTarget> = {
   "macos-arm64": "macos-arm64",
   "macos-x64": "macos-x64",
   linux: "linux",
-  appimage: "linux",
+  appimage: "appimage",
   deb: "deb",
 };
 
@@ -28,20 +27,20 @@ export async function GET(_request: Request, { params }: RouteParams) {
   const key = PLATFORM_ALIASES[platform.toLowerCase()];
 
   if (!key) {
-    return NextResponse.redirect(new URL("/quickstart#install", getSiteUrl()));
+    return NextResponse.redirect(new URL("/quickstart#desktop-downloads", _request.url));
   }
   if (key === "macos") {
-    return NextResponse.redirect(new URL("/quickstart#install", getSiteUrl()));
+    return NextResponse.redirect(new URL("/quickstart#desktop-downloads", _request.url));
   }
 
   const release = await fetchLatestDownloads();
   if (!release) {
-    return NextResponse.redirect(URLS.releasesLatest);
+    return NextResponse.redirect(URLS.releases);
   }
 
   const target = resolvePlatformDownload(release, key);
   if (!target?.url) {
-    return NextResponse.redirect(new URL("/quickstart#install", getSiteUrl()));
+    return NextResponse.redirect(URLS.releases);
   }
 
   return NextResponse.redirect(target.url);

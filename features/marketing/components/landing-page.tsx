@@ -132,8 +132,8 @@ export function LandingPage({ initialRelease }: { initialRelease: ReleaseDownloa
             GitClaw is an <b>open-source, self-hosted</b> alternative to CodeRabbit. It runs on
             your own infrastructure, reviews pull requests on <b>GitHub</b>, <b>GitLab</b>, and{" "}
             <b>Bitbucket</b>, and leaves inline comments on the lines that actually matter —{" "}
-            <code>security</code>, <code>performance</code>, <code>maintainability</code>. No code
-            ever leaves your servers.
+            <code>security</code>, <code>performance</code>, <code>maintainability</code>.
+            Reviews use your chosen AI provider, including a local model.
           </p>
 
           <div className="cta-row">

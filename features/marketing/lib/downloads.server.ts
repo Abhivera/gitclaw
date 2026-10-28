@@ -30,6 +30,8 @@ interface GitHubAsset {
 interface GitHubRelease {
   tag_name: string;
   html_url: string;
+  draft?: boolean;
+  prerelease?: boolean;
   assets: GitHubAsset[];
 }
 
@@ -113,8 +115,10 @@ function mergeDownloads(
 function isCompleteRelease(release: ReleaseDownloads): boolean {
   return Boolean(
     release.windows &&
-      (release.macosArm64 || release.macosX64 || release.macos) &&
-      (release.linuxAppImage || release.linuxDeb),
+      release.macosArm64 &&
+      release.macosX64 &&
+      release.linuxAppImage &&
+      release.linuxDeb,
   );
 }
 
@@ -134,8 +138,8 @@ function pickMacosVariants(assets: GitHubAsset[]): {
 } {
   const dmgs = assets.filter((a) => a.name.toLowerCase().endsWith(".dmg"));
   return {
-    arm64: dmgs.find((a) => /arm64/i.test(a.name)),
-    x64: dmgs.find((a) => /x64|intel/i.test(a.name)),
+    arm64: dmgs.find((a) => /arm64|aarch64|universal/i.test(a.name)),
+    x64: dmgs.find((a) => /x64|x86_64|intel|universal/i.test(a.name)),
   };
 }
 
@@ -147,8 +151,8 @@ function pickLinux(assets: GitHubAsset[]): {
   appImage?: GitHubAsset;
   deb?: GitHubAsset;
 } {
-  const appImage = assets.find((a) => a.name.endsWith(".AppImage"));
-  const deb = assets.find((a) => a.name.endsWith(".deb"));
+  const appImage = assets.find((a) => /\.appimage$/i.test(a.name));
+  const deb = assets.find((a) => /\.deb$/i.test(a.name));
   return { appImage, deb };
 }
 
@@ -159,6 +163,8 @@ function parseGitHubRelease(data: GitHubRelease): ReleaseDownloads | null {
   const win = pickWindows(assets);
   const { arm64: macArm, x64: macIntel } = pickMacosVariants(assets);
   const { appImage, deb } = pickLinux(assets);
+  const genericMac = assets.find((a) => /\.dmg$/i.test(a.name) && !/arm64|aarch64|x64|x86_64|intel/i.test(a.name));
+  if (!win && !macArm && !macIntel && !genericMac && !appImage && !deb) return null;
   const macosArm64 = toGitHubDownload(macArm);
   const macosX64 = toGitHubDownload(macIntel);
 
@@ -167,7 +173,7 @@ function parseGitHubRelease(data: GitHubRelease): ReleaseDownloads | null {
     htmlUrl: data.html_url,
     source: "github",
     windows: toGitHubDownload(win),
-    macos: macosArm64 ?? macosX64,
+    macos: macosArm64 ?? macosX64 ?? toGitHubDownload(genericMac),
     macosArm64,
     macosX64,
     linuxAppImage: toGitHubDownload(appImage),
@@ -191,6 +197,9 @@ function readLocalSiteManifest(): ReleaseDownloads | null {
 }
 
 async function fetchSiteDownloads(): Promise<ReleaseDownloads | null> {
+  // The checked-in manifest can outlive its ignored installers. Only trust a
+  // remote manifest when a separate download host was explicitly configured.
+  if (!process.env.DOWNLOAD_BASE_URL) return null;
   const baseUrl = getDownloadBaseUrl();
 
   try {
@@ -207,21 +216,26 @@ async function fetchSiteDownloads(): Promise<ReleaseDownloads | null> {
 }
 
 async function fetchGitHubDownloads(): Promise<ReleaseDownloads | null> {
-  const res = await fetch(`https://api.github.com/repos/${REPO}/releases?per_page=20`, {
-    headers: { Accept: "application/vnd.github+json" },
-    next: { revalidate: 300 },
-  });
-  if (!res.ok) return null;
+  try {
+    const res = await fetch(`https://api.github.com/repos/${REPO}/releases?per_page=20`, {
+      headers: { Accept: "application/vnd.github+json" },
+      next: { revalidate: 300 },
+    });
+    if (!res.ok) return null;
 
-  const releases = (await res.json()) as GitHubRelease[];
-  for (const release of releases) {
-    const downloads = parseGitHubRelease(release);
-    if (downloads) {
-      return downloads;
+    const releases = (await res.json()) as GitHubRelease[];
+    for (const release of releases) {
+      if (release.draft || release.prerelease) continue;
+      const downloads = parseGitHubRelease(release);
+      if (downloads) {
+        return downloads;
+      }
     }
-  }
 
-  return null;
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 export async function fetchLatestDownloads(): Promise<ReleaseDownloads | null> {

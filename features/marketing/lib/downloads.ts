@@ -1,5 +1,5 @@
 export type PlatformKey = "windows" | "macos" | "linux";
-export type DownloadTarget = PlatformKey | "deb" | "macos-arm64" | "macos-x64";
+export type DownloadTarget = PlatformKey | "appimage" | "deb" | "macos-arm64" | "macos-x64";
 
 export interface ReleaseDownloads {
   windows?: { name: string; url: string };
@@ -48,6 +48,8 @@ export function resolvePlatformDownload(
       return release.macosX64;
     case "linux":
       return release.linuxAppImage ?? release.linuxDeb;
+    case "appimage":
+      return release.linuxAppImage;
     case "deb":
       return release.linuxDeb;
   }

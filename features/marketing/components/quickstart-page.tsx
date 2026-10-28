@@ -103,8 +103,9 @@ export function QuickstartPage({ initialRelease }: { initialRelease: ReleaseDown
                 <h3>Runtime</h3>
               </div>
               <p>
-                <b>Docker path:</b> Docker and Docker Compose. <b>Manual path:</b> Node.js 20.9+ and
-                npm. <b>Desktop path:</b> download an installer — no Docker required.
+                <b>Docker path:</b> Docker and Docker Compose. <b>Manual path:</b> Node.js
+                20.19+, 22.12+, or 24+ and npm. <b>Desktop path:</b> download an installer;
+                the app bundles its runtime and database, so no Node.js or Docker installation is needed.
               </p>
             </div>
             <div className="guide-step">
@@ -147,7 +148,7 @@ export function QuickstartPage({ initialRelease }: { initialRelease: ReleaseDown
                   GitHub App
                 </a>{" "}
                 for GitHub reviews. GitLab and/or Bitbucket OAuth apps only if you use those
-                providers.
+                providers. Git-host accounts are optional for desktop local reviews.
               </p>
             </div>
             <div className="guide-step">
@@ -158,6 +159,7 @@ export function QuickstartPage({ initialRelease }: { initialRelease: ReleaseDown
               <p>
                 Git providers must reach your instance to deliver PR events. Use your production
                 domain, or a tunnel (ngrok, cloudflared) while developing locally.
+                A public URL is not needed for local folder reviews.
               </p>
             </div>
           </div>
@@ -237,19 +239,13 @@ export function QuickstartPage({ initialRelease }: { initialRelease: ReleaseDown
                 <h3>Desktop app — download and launch</h3>
               </div>
               <DownloadSection initialRelease={initialRelease} />
-              <ol>
-                <li>Install and open GitClaw. The dashboard opens automatically.</li>
-                <li>
-                  Go to <b>File → Open configuration folder</b> and edit <code>.env</code> with your
-                  GitHub App and AI keys.
-                </li>
-                <li>Restart the app after saving configuration.</li>
-              </ol>
               <p>
-                The desktop app uses an embedded Postgres instance — no separate database setup.
-                For webhooks, use a tunnel and set <code>APP_URL</code> plus{" "}
-                <code>ALLOWED_DEV_ORIGINS</code> to your public hostname (see{" "}
-                <a href="#deploy">Deploy</a>).
+                The setup wizard saves your AI configuration in the app. For
+                automatic pull request reviews, open <b>Integrations</b> to connect
+                your git provider and configure a webhook tunnel. See{" "}
+                <a href="#deploy">Deploy</a> for public hosting options. Advanced
+                configuration is available through <b>File → Open configuration folder</b>;
+                restart the app after editing <code>.env</code> directly.
               </p>
             </div>
           </div>
