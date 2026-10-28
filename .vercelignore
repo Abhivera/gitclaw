@@ -1,2 +1,5 @@
-desktop/
-release/
+# Exclude native packaging sources, not app/api/desktop routes.
+/desktop/
+/release/
+# These tests import the native sources omitted above; CI tests the full checkout.
+/tests/
