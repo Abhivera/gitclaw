@@ -1,6 +1,6 @@
 {
   "name": "gitclaw-cli",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Self-hosted AI pull request reviewer for GitHub, GitLab, and Bitbucket.",
   "license": "MIT",
   "author": "GitClaw contributors",

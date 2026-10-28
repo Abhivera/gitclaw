@@ -88,6 +88,16 @@ test("universal and unlabelled macOS installers remain available", async () => {
   assert.equal(generic?.macos?.name, "GitClaw.dmg");
 });
 
+test("unsigned releases disclose their signing status beside download links", async () => {
+  const downloads = await loadDownloads({ releases: [release(["GitClaw-Setup.exe"], {
+    name: "GitClaw v0.1.2 (unsigned)",
+  })] }).fetch();
+  assert.equal(downloads?.unsigned, true);
+  const html = renderToStaticMarkup(createElement(DownloadSection, { initialRelease: downloads }));
+  assert.ok(html.includes("These installers are unsigned"));
+  assert.ok(html.includes("not Apple notarized"));
+});
+
 test("format-specific Linux links never download the other package format", () => {
   const downloads: ReleaseDownloads = {
     tag: "v1", htmlUrl: "", source: "github", linuxDeb: { name: "app.deb", url: "https://downloads.test/app.deb" },

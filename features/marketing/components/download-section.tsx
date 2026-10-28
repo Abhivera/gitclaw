@@ -50,6 +50,13 @@ export function DownloadSection({ initialRelease }: DownloadSectionProps) {
         Download GitClaw for Windows, macOS, or Linux. Choose the installer for your machine.
       </p>
 
+      {initialRelease?.unsigned && (
+        <p className="mb-4 rounded-xl border border-amber-400/20 bg-amber-400/5 p-4 text-sm leading-relaxed text-amber-200">
+          These installers are unsigned. Windows and macOS may display security
+          warnings; the macOS app is not Apple notarized. Download only from this
+          site or the linked GitHub release.
+        </p>
+      )}
       {initialRelease === null && (
         <p className="mb-4 text-center text-sm leading-relaxed text-zinc-500">
           Desktop downloads are currently unavailable. Check the{" "}

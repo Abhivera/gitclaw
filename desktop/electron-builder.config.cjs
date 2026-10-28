@@ -14,7 +14,7 @@ for (const platform of ["win", "mac", "linux"]) {
 }
 if (process.platform === "darwin") {
   if (required && (!signed || !notarize)) throw new Error("Public macOS releases require Developer ID signing and Apple notarization credentials.");
-  delete config.mac.identity;
+  if (signed) delete config.mac.identity;
   config.mac.hardenedRuntime = signed;
   config.mac.notarize = notarize;
   if (signed) {

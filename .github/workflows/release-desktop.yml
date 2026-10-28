@@ -5,6 +5,11 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
+    inputs:
+      publish_unsigned:
+        description: Publish unsigned installers as a GitHub Release
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -76,11 +81,12 @@ jobs:
       - name: Package desktop app
         run: npm run dist --prefix desktop
         env:
-          CSC_LINK: ${{ matrix.platform == 'mac' && secrets.MAC_CSC_LINK || matrix.platform == 'win' && secrets.WIN_CSC_LINK || '' }}
-          CSC_KEY_PASSWORD: ${{ matrix.platform == 'mac' && secrets.MAC_CSC_KEY_PASSWORD || matrix.platform == 'win' && secrets.WIN_CSC_KEY_PASSWORD || '' }}
-          APPLE_ID: ${{ matrix.platform == 'mac' && secrets.APPLE_ID || '' }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ matrix.platform == 'mac' && secrets.APPLE_APP_SPECIFIC_PASSWORD || '' }}
-          APPLE_TEAM_ID: ${{ matrix.platform == 'mac' && secrets.APPLE_TEAM_ID || '' }}
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+          CSC_LINK: ${{ !inputs.publish_unsigned && (matrix.platform == 'mac' && secrets.MAC_CSC_LINK || matrix.platform == 'win' && secrets.WIN_CSC_LINK) || '' }}
+          CSC_KEY_PASSWORD: ${{ !inputs.publish_unsigned && (matrix.platform == 'mac' && secrets.MAC_CSC_KEY_PASSWORD || matrix.platform == 'win' && secrets.WIN_CSC_KEY_PASSWORD) || '' }}
+          APPLE_ID: ${{ !inputs.publish_unsigned && matrix.platform == 'mac' && secrets.APPLE_ID || '' }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ !inputs.publish_unsigned && matrix.platform == 'mac' && secrets.APPLE_APP_SPECIFIC_PASSWORD || '' }}
+          APPLE_TEAM_ID: ${{ !inputs.publish_unsigned && matrix.platform == 'mac' && secrets.APPLE_TEAM_ID || '' }}
 
       - name: Smoke-test installed runtime
         if: runner.os != 'Linux'
@@ -128,6 +134,8 @@ jobs:
 
       - name: Build downloads manifest
         run: node desktop/scripts/prepare-website-downloads.mjs
+        env:
+          GITCLAW_UNSIGNED_RELEASE: ${{ inputs.publish_unsigned && '1' || '0' }}
 
       - name: Write checksums
         run: |
@@ -143,22 +151,31 @@ jobs:
 
   release:
     name: Publish GitHub Release
-    if: startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/') || inputs.publish_unsigned
     needs: [build, prepare-downloads]
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
+      - name: Read release version
+        id: version
+        run: node -e 'require("node:fs").appendFileSync(process.env.GITHUB_OUTPUT, "tag=v" + require("./package.json").version + "\n")'
+
       - uses: actions/download-artifact@v4
         with:
+          name: website-downloads
           path: artifacts
-          merge-multiple: true
 
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: ${{ inputs.publish_unsigned && format('GitClaw {0} (unsigned)', steps.version.outputs.tag) || steps.version.outputs.tag }}
+          body: ${{ inputs.publish_unsigned && 'These installers are unsigned. Windows and macOS may display security warnings. macOS builds are not Apple notarized. SHA256SUMS.txt contains file checksums.' || '' }}
           generate_release_notes: true
-          files: artifacts/**/*
+          files: artifacts/*
           fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

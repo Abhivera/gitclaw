@@ -12,6 +12,7 @@ interface SiteDownloadEntry {
 }
 
 interface SiteDownloadManifest {
+  unsigned?: boolean;
   version: string;
   tag: string;
   publishedAt?: string;
@@ -28,6 +29,7 @@ interface GitHubAsset {
 }
 
 interface GitHubRelease {
+  name?: string;
   tag_name: string;
   html_url: string;
   draft?: boolean;
@@ -80,6 +82,7 @@ function parseSiteManifest(
     tag: manifest.tag,
     htmlUrl: `${getSiteUrl()}/quickstart#install`,
     source: "site",
+    unsigned: manifest.unsigned,
     windows,
     macos: macosArm64 ?? macosX64,
     macosArm64,
@@ -103,6 +106,7 @@ function mergeDownloads(
     tag: preferred.tag || fallback.tag,
     htmlUrl: preferred.htmlUrl || fallback.htmlUrl,
     source: preferred.source,
+    unsigned: preferred.unsigned || fallback.unsigned,
     windows,
     macos: macosArm64 ?? macosX64 ?? preferred.macos ?? fallback.macos,
     macosArm64,
@@ -172,6 +176,7 @@ function parseGitHubRelease(data: GitHubRelease): ReleaseDownloads | null {
     tag: data.tag_name,
     htmlUrl: data.html_url,
     source: "github",
+    unsigned: /\bunsigned\b/i.test(data.name ?? ""),
     windows: toGitHubDownload(win),
     macos: macosArm64 ?? macosX64 ?? toGitHubDownload(genericMac),
     macosArm64,

@@ -1,6 +1,6 @@
 {
   "name": "gitclaw-desktop",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "GitClaw desktop app — self-hosted AI PR reviewer",
   "author": "GitClaw contributors",
@@ -63,7 +63,9 @@
       {
         "from": "../.next/standalone/node_modules",
         "to": "standalone/node_modules",
-        "filter": ["**/*"]
+        "filter": [
+          "**/*"
+        ]
       },
       {
         "from": "icons/icon.ico",

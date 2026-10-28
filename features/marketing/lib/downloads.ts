@@ -11,6 +11,7 @@ export interface ReleaseDownloads {
   tag: string;
   htmlUrl: string;
   source: "site" | "github";
+  unsigned?: boolean;
 }
 
 export function detectPlatform(): PlatformKey {

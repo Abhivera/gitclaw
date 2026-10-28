@@ -84,6 +84,7 @@ const manifest = {
   version,
   tag: `v${version}`,
   publishedAt: new Date().toISOString().slice(0, 10),
+  unsigned: process.env.GITCLAW_UNSIGNED_RELEASE === "1",
 };
 
 for (const [key, fileName] of Object.entries(artifacts)) {

@@ -58,7 +58,12 @@ runtime. The Linux job installs its `.deb` before testing, including the standar
 sandbox profile. This prevents a macOS x64 installer from shipping ARM server/database
 binaries. See [GitHub runner architectures](https://docs.github.com/en/actions/how-tos/write-workflows/choose-where-workflows-run/choose-the-runner-for-a-job).
 
-Run `workflow_dispatch` for unsigned preview artifacts. A matching `vVERSION`
+Run `workflow_dispatch` for unsigned preview artifacts. To publish unsigned
+installers, enable **Publish unsigned installers as a GitHub Release**. This
+explicit option publishes `vVERSION` at the selected commit, labels the release
+unsigned, includes that status in the downloads manifest, and does not require
+signing secrets. Windows/macOS may display security warnings; macOS builds are
+not notarized. A matching `vVERSION`
 tag publishes a GitHub Release only after every build and smoke test succeeds.
 Update the root, desktop and CLI package versions and lockfiles together before
 tagging. The pipeline also uploads `website-downloads` with installers,
@@ -69,7 +74,7 @@ assets are used as the website's fallback when local downloads are absent.
 ## Signing required for public releases
 
 Tagged Windows/macOS releases fail early if signing credentials are absent.
-Unsigned preview artifacts are for development and may trigger OS warnings.
+The manual unsigned publishing option above is available when signing is not wanted.
 Configure these GitHub repository secrets before publishing:
 
 | Secret | Purpose |
